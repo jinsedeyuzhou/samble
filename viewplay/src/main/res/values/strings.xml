@@ -70,4 +70,13 @@
 
     <string name="small_problem">Player encountered a small problem</string>
     <string name="not_support">player not support this device</string>
+
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="title_alert">alert</string>
+
+    <string name="tips_not_wifi">You are currently using the mobile network, the player will continue to consume traffic</string>
+    <string name="tips_not_wifi_confirm">Resume</string>
+    <string name="tips_not_wifi_cancel">Stop play</string>
+    <string name="no_url">No mUrl</string>
 </resources>

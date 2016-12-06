@@ -61,6 +61,11 @@ public  class PlayStateParams {
     public static final int MESSAGE_HIDE_CONTOLL = 5;
 
 
+    public static final int MESSAGE_SHOW_DIALOG = 6;
+
+
+
+
 
 
 }

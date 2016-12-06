@@ -10,7 +10,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|layoutDirection"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensor"
             android:theme="@style/Theme.AppCompat.NoActionBar"
 
             >
@@ -20,6 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".VideoListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|layoutDirection"
+            android:screenOrientation="sensor"
+            />
     </application>
 
 </manifest>

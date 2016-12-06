@@ -195,7 +195,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
         View renderUIView = mRenderView.getView();
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER);
         renderUIView.setLayoutParams(lp);

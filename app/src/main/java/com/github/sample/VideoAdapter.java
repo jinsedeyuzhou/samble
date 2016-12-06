@@ -58,7 +58,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
         public VideoViewHolder(View itemView) {
             super(itemView);
-            videoLayout = (FrameLayout) itemView.findViewById(R.id.layout_video);
+            videoLayout = (FrameLayout) itemView.findViewById(R.id.layout_item_video);
             showView= (RelativeLayout) itemView.findViewById(R.id.showview);
             name= (TextView) itemView.findViewById(R.id.name);
         }

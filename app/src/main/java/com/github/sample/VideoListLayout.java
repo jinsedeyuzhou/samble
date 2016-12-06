@@ -9,6 +9,7 @@ import android.os.Build;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,7 @@ import tv.danmaku.ijk.media.player.IMediaPlayer;
  * Description
  */
 public class VideoListLayout extends RelativeLayout {
+    private final static String TAG="VideoListLayout";
 
     private RecyclerView videoList;
     private LinearLayoutManager mLayoutManager;
@@ -94,6 +96,8 @@ public class VideoListLayout extends RelativeLayout {
 
     }
 
+
+
     private void initAction() {
 
         close.setOnClickListener(new View.OnClickListener() {
@@ -120,13 +124,19 @@ public class VideoListLayout extends RelativeLayout {
         videoItemView.setCompletionListener(new VPlayerView.CompletionListener() {
             @Override
             public void completion(IMediaPlayer mp) {
-
+                Log.d(TAG,"completion");
                 //播放完还原播放界面
                 if (smallLayout.getVisibility() == View.VISIBLE) {
                     videoLayout.removeAllViews();
                     smallLayout.setVisibility(View.GONE);
                     videoItemView.setShowContoller(true);
                 }
+//                else if (fullScreen.getVisibility()==View.VISIBLE)
+//                {
+//                    fullScreen.removeAllViews();
+//                    fullScreen.setVisibility(View.GONE);
+//                    videoItemView.setShowContoller(true);
+//                }
 
                 FrameLayout frameLayout = (FrameLayout) videoItemView.getParent();
                 videoItemView.release();
@@ -182,7 +192,7 @@ public class VideoListLayout extends RelativeLayout {
                 }
 
                 View view = videoList.findViewHolderForAdapterPosition(postion).itemView;
-                FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.layout_video);
+                FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.layout_item_video);
                 frameLayout.removeAllViews();
                 frameLayout.addView(videoItemView);
                 videoItemView.setTitle(listData.getList().get(position).getMp4_url());
@@ -197,7 +207,7 @@ public class VideoListLayout extends RelativeLayout {
                 int index = videoList.getChildAdapterPosition(view);
                 view.findViewById(R.id.showview).setVisibility(View.VISIBLE);
                 if (index == postion) {
-                    FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.layout_video);
+                    FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.layout_item_video);
                     frameLayout.removeAllViews();
                     if (videoItemView != null &&
                             ((videoItemView.isPlay()) || videoItemView.VideoStatus() == PlayStateParams.STATE_PAUSED)) {
@@ -224,7 +234,7 @@ public class VideoListLayout extends RelativeLayout {
             public void onChildViewDetachedFromWindow(View view) {
                 int index = videoList.getChildAdapterPosition(view);
                 if (index == postion) {
-                    FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.layout_video);
+                    FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.layout_item_video);
                     frameLayout.removeAllViews();
                     if (smallLayout.getVisibility() == View.GONE && videoItemView != null
                             && videoItemView.isPlay()) {
@@ -245,13 +255,14 @@ public class VideoListLayout extends RelativeLayout {
         if (videoItemView != null) {
             videoItemView.onChanged(newConfig);
             if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                Log.d(TAG,"ORIENTATION_PORTRAIT");
                 fullScreen.setVisibility(View.GONE);
                 videoList.setVisibility(View.VISIBLE);
                 fullScreen.removeAllViews();
                 if (postion <= mLayoutManager.findLastVisibleItemPosition()
                         && postion >= mLayoutManager.findFirstVisibleItemPosition()) {
                     View view = videoList.findViewHolderForAdapterPosition(postion).itemView;
-                    FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.layout_video);
+                    FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.layout_item_video);
                     frameLayout.removeAllViews();
                     frameLayout.addView(videoItemView);
                     videoItemView.setShowContoller(true);
@@ -263,6 +274,7 @@ public class VideoListLayout extends RelativeLayout {
                 }
                 videoItemView.setContorllerVisiable();
             } else {
+                Log.d(TAG,"ORIENTATION_LANSCAPES");
                 ViewGroup viewGroup = (ViewGroup) videoItemView.getParent();
                 if (viewGroup == null)
                     return;

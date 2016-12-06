@@ -1,11 +1,14 @@
 package com.github.jinsedeyuzhou.utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
-public class NetworkUtils {
+public class MediaUtils {
 
 
     /**
@@ -78,6 +81,41 @@ public class NetworkUtils {
         }
         return flag;
 
+    }
+
+    /**
+     * 判断是否有网
+     *
+     * @param context
+     * @return
+     */
+    public static boolean isConnectionAvailable(Context context) {
+        ConnectivityManager con = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo workinfo = con.getActiveNetworkInfo();
+        if (workinfo == null || !workinfo.isAvailable()) {
+            return false;
+        }
+        return true;
+    }
+
+    public static int dip2px(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
+
+
+    public static float  pixel2dip(Context context, float n){
+        Resources resources = context.getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        float dp = n / (metrics.densityDpi / 160f);
+        return dp;
+
+    }
+
+    public int dip2pixel(Context context, float n){
+        int value = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, n, context.getResources().getDisplayMetrics());
+        return value;
     }
 
 }

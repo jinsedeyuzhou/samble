@@ -1,26 +1,34 @@
-<LinearLayout android:id="@+id/app_video_top_box"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:layout_width="wrap_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/app_video_top_box"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:gravity="center_vertical"
+    >
 
     <ImageView
         android:id="@+id/iv_video_finish"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_chevron_left_white_36dp"/>
+        android:src="@drawable/ic_chevron_left_white_36dp" />
 
     <TextView
         android:id="@+id/tv_video_title"
         android:layout_width="wrap_content"
+        android:layout_toRightOf="@+id/iv_video_finish"
         android:layout_height="wrap_content"
         android:ellipsize="marquee"
+        android:layout_weight="1"
         android:padding="8dp"
         android:singleLine="true"
-
+        android:text=";;llllll"
         android:textColor="@android:color/white"
         android:textSize="14dp"
-        android:visibility="gone"
         />
-</LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_video_lockScreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:src="@mipmap/ic_launcher" />
+</RelativeLayout>

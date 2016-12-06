@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +25,7 @@ import tv.danmaku.ijk.media.player.IMediaPlayer;
 /**
  * Created by Berkeley on 11/2/16.
  */
-public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener {
+public class VPlayerView extends RelativeLayout implements IMediaPlayer.OnInfoListener, IMediaPlayer.OnBufferingUpdateListener {
 
 
     private View rootView;
@@ -33,17 +33,20 @@ public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoLis
     private IjkVideoView mVideoView;
     private CustomMediaContoller mediaController;
     private Context mContext;
+    private Activity activity;
     private Handler handler=new Handler();
     private boolean isPause;
     private boolean portrait;
     private View toolbar;
     private ImageView finish;
     private TextView mTitle;
-//    private ConnectionChangeReceiver changeReceiver;
+//    private ImageView mLockScreen;
+    //    private ConnectionChangeReceiver changeReceiver;
 
     public VPlayerView(Context context) {
         super(context);
         mContext = context;
+        activity= (Activity) mContext;
         initData();
         initView();
         initAction();
@@ -62,9 +65,10 @@ public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoLis
         /**
          * toolsbar
          */
-        toolbar = findViewById(R.id.player_toolbar);
+//        toolbar = findViewById(R.id.app_video_top_box);
         mTitle = (TextView) findViewById(R.id.tv_video_title);
         finish = (ImageView) findViewById(R.id.iv_video_finish);
+//        mLockScreen = (ImageView) findViewById(R.id.iv_video_lockScreen);
 
 
 //        IntentFilter intentFilter=new IntentFilter();
@@ -75,25 +79,37 @@ public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoLis
         mVideoView = (IjkVideoView) findViewById(R.id.main_video);
         mediaController = new CustomMediaContoller(mContext, rootView);
         mVideoView.setMediaController(mediaController);
-
-        mVideoView.setOnCompletionListener(new IMediaPlayer.OnCompletionListener() {
+        mediaController.setCompletionListener(new CustomMediaContoller.CompletionListener() {
             @Override
-            public void onCompletion(IMediaPlayer mp) {
-                controlbar.setVisibility(View.GONE);
-                toolbar.setVisibility(View.GONE);
-                if (mediaController.getScreenOrientation((Activity) mContext)
-                        == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-                    //横屏播放完毕，重置
-                    ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                    ViewGroup.LayoutParams layoutParams = getLayoutParams();
-                    layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
-                    layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-                    setLayoutParams(layoutParams);
-                }
+            public void completion(IMediaPlayer mp) {
                 if (completionListener != null)
                     completionListener.completion(mp);
             }
         });
+
+
+//        mVideoView.setOnCompletionListener(new IMediaPlayer.OnCompletionListener() {
+//            @Override
+//            public void onCompletion(IMediaPlayer mp) {
+//                controlbar.setVisibility(View.VISIBLE);
+//
+//
+////                toolbar.setVisibility(View.GONE);
+////                mVideoView.release(true);
+//
+//                if (mediaController.getScreenOrientation((Activity) mContext)
+//                        == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+//                    //横屏播放完毕，重置
+//                    ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//                    ViewGroup.LayoutParams layoutParams = getLayoutParams();
+//                    layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+//                    layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+//                    setLayoutParams(layoutParams);
+//                }
+//                if (completionListener != null)
+//                    completionListener.completion(mp);
+//            }
+//        });
 
 
     }
@@ -129,11 +145,11 @@ public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoLis
 
         if (!mVideoView.isPlaying()) {
             mVideoView.setVideoURI(uri);
-//            mVideoView.start();
+            mVideoView.start();
         } else {
             mVideoView.stopPlayback();
             mVideoView.setVideoURI(uri);
-//            mVideoView.start();
+            mVideoView.start();
         }
     }
 
@@ -145,11 +161,11 @@ public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoLis
 
     public void onPause()
     {
-        pause();
+       mediaController.onPause();
     }
     public void onResume()
     {
-        start();
+        mediaController.onResume();
     }
 
     public void setContorllerVisiable(){
@@ -162,7 +178,8 @@ public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoLis
 
     public void onChanged(Configuration configuration) {
         portrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT;
-        doOnConfigurationChanged(portrait);
+        mediaController.doOnConfigurationChanged(portrait);
+
     }
 
     public void doOnConfigurationChanged(final boolean portrait) {
@@ -201,8 +218,19 @@ public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoLis
         }
     }
 
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mediaController.getScreenOrientation((Activity) mContext) == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            return true;
+        }
+        return false;
+    }
+
     public void onDestroy() {
         handler.removeCallbacksAndMessages(null);
+        mediaController.onDestory();
 //        orientationEventListener.disable();
 //        mContext.unregisterReceiver(changeReceiver);
     }
@@ -231,19 +259,20 @@ public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoLis
 
     }
 
+    /**
+     * 是否显示左上导航图标(一般有actionbar or appToolbar时需要隐藏)
+     *
+     * @param show
+     */
+    public void setShowNavIcon(boolean show) {
+        finish.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+
     public void setShowContoller(boolean isShowContoller) {
         mediaController.setShowContoller(isShowContoller);
     }
 
-    @Override
-    public void onBufferingUpdate(MediaPlayer mp, int percent) {
-
-    }
-
-    @Override
-    public boolean onInfo(MediaPlayer mp, int what, int extra) {
-        return false;
-    }
 
     public long getPalyPostion() {
         return mVideoView.getCurrentPosition();
@@ -266,55 +295,19 @@ public class VPlayerView extends RelativeLayout implements MediaPlayer.OnInfoLis
         this.completionListener = completionListener;
     }
 
+    @Override
+    public void onBufferingUpdate(IMediaPlayer iMediaPlayer, int i) {
+
+    }
+
+    @Override
+    public boolean onInfo(IMediaPlayer iMediaPlayer, int i, int i1) {
+        return false;
+    }
+
     public interface CompletionListener {
         void completion(IMediaPlayer mp);
     }
 
-//    class ConnectionChangeReceiver extends BroadcastReceiver {
-//        private  final String TAG = ConnectionChangeReceiver.class.getSimpleName();
-//
-//        private boolean isWifi;
-//        private boolean isMobile;
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            Log.e(TAG, "网络状态改变");
-//            //获得网络连接服务
-//            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
-//            //获取wifi连接状态
-//            NetworkInfo.State wifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-//            //判断是否正在使用wifi网络
-//            if (wifi == NetworkInfo.State.CONNECTED) {
-//                isWifi = true;
-//            }
-//            else
-//                isWifi=false;
-//            //获取GPRS状态
-//            NetworkInfo.State  state = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
-//            //判断是否在使用GPRS网络
-//            if (state == NetworkInfo.State.CONNECTED) {
-//                isMobile = true;
-//                mVideoView.pause();
-//            }
-//            else
-//                isMobile=false;
-//            //如果没有连接成功
-//            if(!isWifi){
-//                Toast.makeText(context,"当前网络无连接",Toast.LENGTH_SHORT).show();
-//                mediaController.pause();
-//            }
-//            else if (!isMobile)
-//            {
-//                mediaController.pause();
-//                mediaController.show();
-//
-//            }
-//            else
-//            {
-//                mediaController.pause();
-//            }
-//
-//        }
-//
-//    }
 
 }
