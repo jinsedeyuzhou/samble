@@ -14,14 +14,23 @@
         android:layout_height="match_parent"
         />
 
-    <ImageView
-        android:id="@+id/pause_image"
+    <LinearLayout
+        android:id="@+id/app_video_replay"
+        android:gravity="center"
         android:visibility="gone"
-        android:layout_centerInParent="true"
+        android:background="#B3616161"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@mipmap/video_play_btn"
-        />
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/pause_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:src="@mipmap/video_play_btn"
+            />
+    </LinearLayout>
+
+
 
     <include
         android:id="@+id/media_contoller"
@@ -34,6 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:indeterminateDrawable="@drawable/progressbar"
         android:visibility="gone" />
 
 

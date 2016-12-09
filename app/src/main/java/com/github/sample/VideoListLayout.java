@@ -258,6 +258,7 @@ public class VideoListLayout extends RelativeLayout {
                 Log.d(TAG,"ORIENTATION_PORTRAIT");
                 fullScreen.setVisibility(View.GONE);
                 videoList.setVisibility(View.VISIBLE);
+                videoItemView.showToolbar(false);
                 fullScreen.removeAllViews();
                 if (postion <= mLayoutManager.findLastVisibleItemPosition()
                         && postion >= mLayoutManager.findFirstVisibleItemPosition()) {
@@ -266,6 +267,7 @@ public class VideoListLayout extends RelativeLayout {
                     frameLayout.removeAllViews();
                     frameLayout.addView(videoItemView);
                     videoItemView.setShowContoller(true);
+
                 } else {
                     videoLayout.removeAllViews();
                     videoLayout.addView(videoItemView);
@@ -280,6 +282,7 @@ public class VideoListLayout extends RelativeLayout {
                     return;
                 viewGroup.removeAllViews();
                 fullScreen.addView(videoItemView);
+                videoItemView.showToolbar(true);
                 smallLayout.setVisibility(View.GONE);
                 videoList.setVisibility(View.GONE);
                 fullScreen.setVisibility(View.VISIBLE);

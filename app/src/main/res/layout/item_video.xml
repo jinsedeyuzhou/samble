@@ -2,15 +2,36 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="4dp"
-    android:layout_marginTop="4dp"
-    android:background="@android:color/holo_blue_light">
+    android:layout_marginTop="4dp">
+
+    <RelativeLayout
+        android:id="@+id/rl_video_container_title"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="3dp"
+        android:layout_marginTop="3dp"
+        android:layout_height="wrap_content">
 
 
+        <TextView
+            android:id="@+id/tv_video_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:text="2399999999999999999992333"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:textColor="#333333"
+            android:textSize="15sp"
+
+            />
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/layout"
         android:layout_width="match_parent"
-        android:layout_height="200dp">
+        android:layout_height="200dp"
+        android:layout_below="@id/rl_video_container_title">
 
         <FrameLayout
             android:id="@+id/layout_item_video"
@@ -27,16 +48,20 @@
             <ImageView
                 android:id="@+id/image_bg"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/ic_launcher"
+                />
 
             <ImageView
                 android:id="@+id/image_play"
-                android:layout_centerInParent="true"
-                android:src="@android:drawable/ic_media_play"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@android:drawable/ic_media_play" />
         </RelativeLayout>
 
     </RelativeLayout>
-    <include layout="@layout/item_bottom"/>
+
+    <include layout="@layout/item_bottom" />
 </RelativeLayout>

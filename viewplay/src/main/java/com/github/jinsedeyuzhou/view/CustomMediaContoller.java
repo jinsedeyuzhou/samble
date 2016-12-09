@@ -89,8 +89,9 @@ public class CustomMediaContoller implements IMediaController {
 //    private RelativeLayout show;
 //    private TextView seekTxt;
     private Bitmap bitmap;
-//    private final GestureDetector detector;
+    //    private final GestureDetector detector;
     private RelativeLayout top_box;
+    private boolean isFixedTool;
     //是否允许移动播放
     private boolean isAllowModible;
 
@@ -117,7 +118,6 @@ public class CustomMediaContoller implements IMediaController {
     private ImageView mLockScreen;
 
 
-
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -130,7 +130,8 @@ public class CustomMediaContoller implements IMediaController {
 //                    top_box.setVisibility(View.GONE);
 //                    bottomProgress.setVisibility(View.VISIBLE);
                     Log.d(TAG, "handleMessage1");
-                    hideAll();
+//                    hideAll();
+                    hide(false);
                     break;
                 case PlayStateParams.MESSAGE_SHOW_PROGRESS:
 //                    Log.d(TAG, "handleMessage  MESSAGE_SHOW_PROGRESS"+newPosition);
@@ -144,10 +145,10 @@ public class CustomMediaContoller implements IMediaController {
                     break;
                 case PlayStateParams.PAUSE_IMAGE_HIDE:
                     Log.v(TAG, "handleMessage3");
-                    pauseImage.setVisibility(View.GONE);
+                    appVideoPlay.setVisibility(View.GONE);
                     break;
                 case PlayStateParams.MESSAGE_SEEK_NEW_POSITION:
-                    Log.v(TAG, "handleMessage MESSAGE_SEEK_NEW_POSITION"+newPosition);
+                    Log.v(TAG, "handleMessage MESSAGE_SEEK_NEW_POSITION" + newPosition);
                     if (newPosition >= 0) {
                         mVideoView.seekTo((int) newPosition);
                         newPosition = -1;
@@ -159,6 +160,9 @@ public class CustomMediaContoller implements IMediaController {
                     gestureTouch.setVisibility(View.GONE);
 //                    brightness_layout.setVisibility(View.GONE);
 //                    sound_layout.setVisibility(View.GONE);
+                    if (isShow) {
+                        show(PlayStateParams.TIME_OUT);
+                    }
                     break;
                 case PlayStateParams.MESSAGE_SHOW_DIALOG:
                     showWifiDialog();
@@ -209,13 +213,26 @@ public class CustomMediaContoller implements IMediaController {
                 isSound = !isSound;
             } else if (view.getId() == R.id.iv_video_finish) {
                 quitFullScreen();
-            }
-            else if (view.getId()==R.id.iv_video_lockScreen)
-            {
+            } else if (view.getId() == R.id.iv_video_lockScreen) {
+                Log.v(TAG, "isLock:" + isLock);
+                if (!isLock) {
+                    isLock = true;
+                    ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                }
+                {
+                    isLock = false;
+                    ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
+                }
+            } else if (view.getId() == R.id.pause_image) {
+                appVideoPlay.setVisibility(View.GONE);
+                mVideoView.seekTo(0);
+                mVideoView.start();
+                updatePausePlay();
             }
         }
     };
+    private LinearLayout appVideoPlay;
 
 
     public CustomMediaContoller(Context context, View view) {
@@ -252,6 +269,7 @@ public class CustomMediaContoller implements IMediaController {
         sound = (ImageView) contollerbar.findViewById(R.id.sound);
         play = (ImageView) contollerbar.findViewById(R.id.player_btn);
         pauseImage = (ImageView) view.findViewById(R.id.pause_image);
+        appVideoPlay = (LinearLayout) view.findViewById(R.id.app_video_replay);
 
         //触屏
         gestureTouch = (LinearLayout) view.findViewById(R.id.ll_gesture_touch);
@@ -278,7 +296,7 @@ public class CustomMediaContoller implements IMediaController {
 
     private void initAction() {
         isSound = true;
-        final GestureDetector   detector = new GestureDetector(mContext, new PlayGestureListener());
+        final GestureDetector detector = new GestureDetector(mContext, new PlayGestureListener());
         mMaxVolume = ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
                 .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         sound.setOnClickListener(onClickListener);
@@ -286,6 +304,7 @@ public class CustomMediaContoller implements IMediaController {
         mVideoFinish.setOnClickListener(onClickListener);
         full.setOnClickListener(onClickListener);
         mLockScreen.setOnClickListener(onClickListener);
+        pauseImage.setOnClickListener(onClickListener);
         seekBar.setMax(1000);
         seekBar.setOnSeekBarChangeListener(mSeekListener);
 //        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -426,12 +445,14 @@ public class CustomMediaContoller implements IMediaController {
         });
 
 
-        hideAll();
+//        hideAll();
+        hide(false);
 
 
     }
-     private   boolean instantSeeking;
-    private final SeekBar.OnSeekBarChangeListener mSeekListener=new SeekBar.OnSeekBarChangeListener() {
+
+    private boolean instantSeeking;
+    private final SeekBar.OnSeekBarChangeListener mSeekListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 //            String string = generateTime((long) (duration * progress * 1.0f / 1000));
@@ -491,23 +512,26 @@ public class CustomMediaContoller implements IMediaController {
     };
 
 
-    private void hideAll()
-    {
-        setShowContollerbar(false);
-        top_box.setVisibility(View.GONE);
-        bottomProgress.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.GONE);
-    }
+    //    private void hideAll()
+//    {
+//        setShowContollerbar(false);
+//        top_box.setVisibility(View.GONE);
+//        bottomProgress.setVisibility(View.VISIBLE);
+//        progressBar.setVisibility(View.GONE);
+//        hide(false);
+//    }
     private void statusChange(int newStatus) {
-        status=newStatus;
+        status = newStatus;
         status = newStatus;
         if (newStatus == PlayStateParams.STATE_PLAYBACK_COMPLETED) {
 //            mContext.unregisterReceiver(changeReceiver);
             Log.d(TAG, "STATE_PLAYBACK_COMPLETED");
             handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-            hideAll();
+//            hideAll();
+            hide(false);
             bottomProgress.setProgress(0);
             isShowContoller = false;
+            appVideoPlay.setVisibility(View.VISIBLE);
 //            mReplay.setVisibility(View.VISIBLE);
 //            handler.sendEmptyMessage(9);
 
@@ -516,26 +540,28 @@ public class CustomMediaContoller implements IMediaController {
 //            mContext.unregisterReceiver(changeReceiver);
             bottomProgress.setProgress(0);
             handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-            hideAll();
+            hide(false);
         } else if (newStatus == PlayStateParams.STATE_PREPARING) {
             Log.d(TAG, "STATE_PREPARING");
-            hideAll();
+//            bottomProgress.setProgress(0);
+            hide(false);
             if (progressBar.getVisibility() == View.GONE)
                 progressBar.setVisibility(View.VISIBLE);
         } else if (newStatus == PlayStateParams.STATE_PLAYING) {
 //            mContext.registerReceiver(changeReceiver,intentFilter);
             Log.d(TAG, "STATE_PLAYING");
-            hideAll();
+            hide(false);
+            progressBar.setVisibility(View.GONE);
+
             isShowContoller = true;
             play.setVisibility(View.VISIBLE);
-//            if (!MediaUtils.isNetworkAvailable(mContext)&&MediaUtils.isConnectionAvailable(mContext)&&!isAllowModible ) {
-//                mVideoView.pause();
-//                handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-//                showWifiDialog();
-//            }
+            if (!MediaUtils.isNetworkAvailable(mContext) && MediaUtils.isConnectionAvailable(mContext) && !isAllowModible) {
+                mVideoView.pause();
+                handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
+                showWifiDialog();
+            }
 
         }
-
 
 
     }
@@ -550,6 +576,10 @@ public class CustomMediaContoller implements IMediaController {
             activity.finish();
     }
 
+    public void setFixed(boolean isFixedTool)
+    {
+        this.isFixedTool=isFixedTool;
+    }
     /**
      * 展示控制面板
      *
@@ -560,15 +590,16 @@ public class CustomMediaContoller implements IMediaController {
 
     }
 
-    private void hide(boolean show)
-    {
-        top_box.setVisibility(show ? View.VISIBLE : View.GONE);
+    private void hide(boolean show) {
+        if (!isFixedTool)
+        {
+            top_box.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
         bottomProgress.setVisibility(show ? View.GONE : View.VISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
-        updatePausePlay();
+        appVideoPlay.setVisibility(View.GONE);
         setShowContollerbar(show);
+        updatePausePlay();
     }
-
 
 
     /**
@@ -665,16 +696,18 @@ public class CustomMediaContoller implements IMediaController {
      */
     private void updatePausePlay() {
         if (mVideoView.isPlaying()) {
-            play.setImageResource(R.drawable.play_selector);
-        } else {
             play.setImageResource(R.drawable.pause_selector);
+        } else {
+            play.setImageResource(R.drawable.play_selector);
         }
     }
 
     public void start() {
-        pauseImage.setVisibility(View.GONE);
+        isShowContoller=false;
+        bottomProgress.setProgress(0);
         hide(false);
         progressBar.setVisibility(View.VISIBLE);
+        bottomProgress.setVisibility(View.VISIBLE);
 
 
     }
@@ -685,7 +718,7 @@ public class CustomMediaContoller implements IMediaController {
         bitmap = mVideoView.getBitmap();
         if (bitmap != null) {
             pauseImage.setImageBitmap(bitmap);
-            pauseImage.setVisibility(View.VISIBLE);
+            appVideoPlay.setVisibility(View.VISIBLE);
         }
     }
 
@@ -695,8 +728,7 @@ public class CustomMediaContoller implements IMediaController {
         mVideoView.stopPlayback();
     }
 
-    public void   onResume()
-    {
+    public void onResume() {
         if (status == PlayStateParams.STATE_PAUSED) {
             if (currentPosition > 0) {
                 mVideoView.seekTo((int) currentPosition);
@@ -706,12 +738,11 @@ public class CustomMediaContoller implements IMediaController {
         }
     }
 
-    public void onPause()
-    {
+    public void onPause() {
         show(0);//把系统状态栏显示出来
         if (status == PlayStateParams.STATE_PLAYING) {
             mVideoView.pause();
-            currentPosition=mVideoView.getCurrentPosition();
+            currentPosition = mVideoView.getCurrentPosition();
             statusChange(PlayStateParams.STATE_PAUSED);
         }
     }
@@ -821,8 +852,8 @@ public class CustomMediaContoller implements IMediaController {
                 bottomProgress.setProgress((int) pos);
             }
             int percent = mVideoView.getBufferPercentage();
-            seekBar.setSecondaryProgress(percent*10);
-            bottomProgress.setSecondaryProgress(percent*10);
+            seekBar.setSecondaryProgress(percent * 10);
+            bottomProgress.setSecondaryProgress(percent * 10);
         }
         String string = generateTime((long) (duration * seekBar.getProgress() * 1.0f / 1000));
         time.setText(string);
@@ -837,7 +868,7 @@ public class CustomMediaContoller implements IMediaController {
     }
 
     public void setPauseImageHide() {
-        pauseImage.setVisibility(View.GONE);
+        appVideoPlay.setVisibility(View.GONE);
     }
 
     public class PlayGestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -851,7 +882,7 @@ public class CustomMediaContoller implements IMediaController {
          */
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            Log.v(TAG,"onDoubleTap");
+            Log.v(TAG, "onDoubleTap");
 //            mVideoView.toggleAspectRatio();
             return true;
         }
@@ -918,7 +949,7 @@ public class CustomMediaContoller implements IMediaController {
 
             if (seek) {
 
-                    onProgressSlide(-deltaX / mVideoView.getWidth());
+                onProgressSlide(-deltaX / mVideoView.getWidth());
             } else {
                 float percent = deltaY / mVideoView.getHeight();
                 if (volumeControl) {
@@ -946,12 +977,14 @@ public class CustomMediaContoller implements IMediaController {
 //            handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
             isShow = false;
             handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
-            contollerbar.setVisibility(View.GONE);
-            bottomProgress.setVisibility(View.VISIBLE);
-            top_box.setVisibility(View.GONE);
+//            contollerbar.setVisibility(View.GONE);
+//            bottomProgress.setVisibility(View.VISIBLE);
+//            top_box.setVisibility(View.GONE);
+            hide(false);
+
+
         }
     }
-
 
 
     @Override
@@ -987,18 +1020,19 @@ public class CustomMediaContoller implements IMediaController {
 
     @Override
     public void show() {
-        Log.d(TAG, "show"+isShow+"isShowContoller"+isShowContoller+"position:"+newPosition);
+        Log.d(TAG, "show" + isShow + "isShowContoller" + isShowContoller + "position:" + newPosition);
         if (!isShowContoller)
             return;
         if (!isShow)
             isShow = true;
         progressBar.setVisibility(View.GONE);
-        contollerbar.setVisibility(View.VISIBLE);
-        bottomProgress.setVisibility(View.GONE);
+//        contollerbar.setVisibility(View.VISIBLE);
+//        bottomProgress.setVisibility(View.GONE);
+        hide(true);
 //        updatePausePlay();
-        top_box.setVisibility(View.VISIBLE);
+//        top_box.setVisibility(View.VISIBLE);
         handler.sendEmptyMessage(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-        show(PlayStateParams.TIME_OUT);
+//        show(PlayStateParams.TIME_OUT);
 
     }
 
@@ -1012,7 +1046,7 @@ public class CustomMediaContoller implements IMediaController {
      * 手势结束
      */
     private void endGesture() {
-        Log.v(TAG,"endGesture:new Position:"+newPosition);
+        Log.v(TAG, "endGesture:new Position:" + newPosition);
         volume = -1;
         brightness = -1f;
         if (newPosition >= 0) {
@@ -1044,7 +1078,6 @@ public class CustomMediaContoller implements IMediaController {
         });
         builder.create().show();
     }
-
 
 
     /**
@@ -1090,13 +1123,13 @@ public class CustomMediaContoller implements IMediaController {
     }
 
     /**
+     * 快进或者快退
      *
-     *快进或者快退
      * @param percent 移动比例
      * @param
      */
     private void onProgressSlide(float percent) {
-        Log.v(TAG,"onprogressSlide:"+newPosition);
+        Log.v(TAG, "onprogressSlide:" + newPosition);
         long position = mVideoView.getCurrentPosition();
         long duration = mVideoView.getDuration();
         long deltaMax = Math.min(100 * 1000, duration - position);
@@ -1110,7 +1143,7 @@ public class CustomMediaContoller implements IMediaController {
             delta = -position;
         }
         int showDelta = (int) delta / 1000;
-        Log.e("showdelta", ((  percent) * 100) + "");
+        Log.e("showdelta", ((percent) * 100) + "");
         if (showDelta != 0) {
             if (gestureTouch.getVisibility() == View.GONE) {
                 gestureTouch.setVisibility(View.VISIBLE);
@@ -1125,7 +1158,7 @@ public class CustomMediaContoller implements IMediaController {
             mTvDuration.setText(allTime.getText());
 //            mProgressGesture.setProgress((int) newPosition);
             mProgressGesture.setProgress(duration <= 0 ? 0 : (int) (newPosition * 100 / duration));
-            Log.v(TAG,"onprogressSlide:"+newPosition);
+            Log.v(TAG, "onprogressSlide:" + newPosition);
         }
     }
 

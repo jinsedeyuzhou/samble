@@ -1,7 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="20dp"
+    android:layout_height="30dp"
     android:layout_below="@+id/layout"
+    android:gravity="center_vertical"
     android:background="@android:color/white">
 
     <TextView
@@ -9,8 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:gravity="center|left"
         android:paddingLeft="10dp"
+        android:layout_centerVertical="true"
         android:text="中国网"
         android:textColor="@android:color/black" />
 
@@ -33,4 +34,11 @@
         android:layout_marginRight="10dp"
         android:text="评论数据"
         android:textColor="@android:color/black" />
+
+    <ImageView
+        android:id="@+id/line_bottom_imageView"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_height="4dp"
+        android:background="#f8f8f8" />
 </RelativeLayout>

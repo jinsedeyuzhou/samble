@@ -37,7 +37,7 @@ public class VPlayerView extends RelativeLayout implements IMediaPlayer.OnInfoLi
     private Handler handler=new Handler();
     private boolean isPause;
     private boolean portrait;
-    private View toolbar;
+    private RelativeLayout toolbar;
     private ImageView finish;
     private TextView mTitle;
 //    private ImageView mLockScreen;
@@ -65,7 +65,7 @@ public class VPlayerView extends RelativeLayout implements IMediaPlayer.OnInfoLi
         /**
          * toolsbar
          */
-//        toolbar = findViewById(R.id.app_video_top_box);
+        toolbar = (RelativeLayout) findViewById(R.id.app_video_top_box);
         mTitle = (TextView) findViewById(R.id.tv_video_title);
         finish = (ImageView) findViewById(R.id.iv_video_finish);
 //        mLockScreen = (ImageView) findViewById(R.id.iv_video_lockScreen);
@@ -228,6 +228,11 @@ public class VPlayerView extends RelativeLayout implements IMediaPlayer.OnInfoLi
         return false;
     }
 
+    public void showToolbar(boolean isShow)
+    {
+        mediaController.setFixed(true);
+        toolbar.setVisibility(isShow?View.VISIBLE:View.GONE);
+    }
     public void onDestroy() {
         handler.removeCallbacksAndMessages(null);
         mediaController.onDestory();
@@ -251,6 +256,10 @@ public class VPlayerView extends RelativeLayout implements IMediaPlayer.OnInfoLi
 
     }
 
+    /**
+     * 设置标题
+     * @param str
+     */
     public void setTitle(String str)
     {
         if (mVideoView==null)

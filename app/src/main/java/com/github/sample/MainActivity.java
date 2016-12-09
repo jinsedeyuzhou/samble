@@ -15,7 +15,7 @@ import com.github.jinsedeyuzhou.view.CustomDialog;
 import com.github.jinsedeyuzhou.view.VPlayerView;
 
 public class MainActivity extends AppCompatActivity {
-    private String url="http://119.90.25.48/record2.a8.com/mp4/1477100428026014.mp4";
+    private String url="http://gslb.miaopai.com/stream/4YUE0MlhLclpX3HIeA273g__.mp4?yx=&refer=weibo_app";
     private  int mporit;
     private FrameLayout content;
     private VPlayerView vp;
@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
