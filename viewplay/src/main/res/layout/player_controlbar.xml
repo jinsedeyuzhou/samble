@@ -67,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="10dp"
-                android:src="@mipmap/ic_fullscreen_white_24dp" />
+                android:src="@mipmap/ic_fullscreen" />
         </LinearLayout>
 
     </RelativeLayout>

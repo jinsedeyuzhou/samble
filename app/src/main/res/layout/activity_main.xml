@@ -12,7 +12,7 @@
     <FrameLayout
         android:id="@+id/fl_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="210dp"/>
     <Button
         android:id="@+id/btn_video"
         android:layout_below="@+id/fl_content"

@@ -1,4 +1,4 @@
-package com.github.jinsedeyuzhou.view;
+package com.github.jinsedeyuzhou;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,45 +8,48 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.jinsedeyuzhou.R;
-import com.github.jinsedeyuzhou.media.IMediaController;
 import com.github.jinsedeyuzhou.media.IjkVideoView;
 import com.github.jinsedeyuzhou.utils.MediaUtils;
+import com.github.jinsedeyuzhou.view.PlayStateParams;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * Created by Berkeley on 11/2/16.
  */
-public class CustomMediaContoller extends FrameLayout implements IMediaController {
+public class VPlayPlayer extends RelativeLayout {
 
-    private static final String TAG = "CustomMediaContoller";
+    private static final String TAG = "VPlayPlayer";
     private Context mContext;
     private Activity activity;
     private View view;
@@ -61,7 +64,7 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
     private boolean isShowContoller;
 
     private boolean isSound;
-    private final AudioManager audioManager;
+    private AudioManager audioManager;
     private int currentPosition;
     //默认超时时间
     private int defaultTimeout = 3000;
@@ -86,14 +89,7 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
     private ImageView sound;
     private ImageView play;
     private ImageView pauseImage;
-    //    private LinearLayout brightness_layout;
-//    private VSeekBar brightness_seek;
-//    private LinearLayout sound_layout;
-//    private VSeekBar sound_seek;
-//    private RelativeLayout show;
-//    private TextView seekTxt;
     private Bitmap bitmap;
-    //    private final GestureDetector detector;
     private RelativeLayout top_box;
     private boolean isFixedTool;
 
@@ -118,11 +114,11 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
     private TextView mTvDuration;
     private ImageView mImageTip;
     private ProgressBar mProgressGesture;
-    private final RelativeLayout layout;
-    private final IntentFilter intentFilter;
+    private RelativeLayout layout;
+    private IntentFilter intentFilter;
     private ImageView mLockScreen;
     private OrientationEventListener orientationEventListener;
-
+    private LinearLayout appVideoPlay;
 
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -132,7 +128,7 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
             switch (msg.what) {
                 case PlayStateParams.SET_VIEW_HIDE:
                     isShow = false;
-//                    contollerbar.setVisibility(View.GONE);
+//                    setVisibility(View.GONE);
 //                    top_box.setVisibility(View.GONE);
 //                    bottomProgress.setVisibility(View.VISIBLE);
                     Log.d(TAG, "handleMessage1");
@@ -162,10 +158,7 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
                     break;
                 case PlayStateParams.MESSAGE_HIDE_CONTOLL:
                     Log.v(TAG, "handleMessage4");
-//                    seekTxt.setVisibility(View.GONE);
                     gestureTouch.setVisibility(View.GONE);
-//                    brightness_layout.setVisibility(View.GONE);
-//                    sound_layout.setVisibility(View.GONE);
                     if (isShow) {
                         show(PlayStateParams.TIME_OUT);
                     }
@@ -177,35 +170,36 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
         }
     };
 
-    private final View.OnClickListener onClickListener = new View.OnClickListener() {
+    private final OnClickListener onClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
             if (view.getId() == R.id.player_btn) {
-
-                if (mVideoView.isPlaying()) {
-                    pause();
-                } else {
-                    reStart();
-                }
-
-//                if (MediaUtils.isNetworkAvailable(mContext) || MediaUtils.isConnectionAvailable(mContext) && isAllowModible) {
-//                    if (mVideoView.isPlaying()) {
-//                        pause();
-//                    } else {
-//                        reStart();
-//                    }
-//                } else if (!MediaUtils.isConnectionAvailable(mContext) && !isAllowModible) {
-////                    handler.sendEmptyMessage(PlayStateParams.MESSAGE_SHOW_DIALOG);
+//
+//                if (mVideoView.isPlaying()) {
+//                    pause();
+//                } else {
+//                    reStart();
 //                }
+
+                if (MediaUtils.isNetworkAvailable(mContext) || MediaUtils.isConnectionAvailable(mContext) && isAllowModible) {
+                    if (mVideoView.isPlaying()) {
+                        pause();
+                    } else {
+                        reStart();
+                    }
+                } else  {
+//                    handler.sendEmptyMessage(PlayStateParams.MESSAGE_SHOW_DIALOG);
+                    showWifiDialog();
+                }
 
             } else if (view.getId() == R.id.full) {
                 Log.e("full", "full");
                 if (getScreenOrientation((Activity) mContext) == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
                     ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                    iSportrait=true;
+                    iSportrait = true;
                 } else {
                     ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                    iSportrait=false;
+                    iSportrait = false;
                 }
                 updateFullScreenButton();
             } else if (view.getId() == R.id.sound) {
@@ -240,68 +234,83 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
             }
         }
     };
-    private LinearLayout appVideoPlay;
 
 
-    public CustomMediaContoller(Context context, View view) {
-        super(context);
+    public VPlayPlayer(Context context) {
+        this(context, null);
 
-        this.view = view;
-        contollerbar = view.findViewById(R.id.media_contoller);
-        this.mVideoView = (IjkVideoView) view.findViewById(R.id.main_video);
-        layout = (RelativeLayout) view.findViewById(R.id.layout);
-        initHeight = layout.getLayoutParams().height;
-        isShow = false;
-        isDragging = false;
-        isShowContoller = true;
+    }
+
+    public VPlayPlayer(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public VPlayPlayer(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         this.mContext = context;
-        activity = (Activity) mContext;
+        activity = (Activity) context;
+        initView();
+        initAction();
+    }
+
+//
+//    public VPlayPlayer(Context context, View view) {
+//        super(context);
+//
+//      
+//        initView();
+//        initAction();
+//
+//    }
+
+    private void initView() {
+
+        try {
+            IjkMediaPlayer.loadLibrariesOnce(null);
+            IjkMediaPlayer.native_profileBegin("libijkplayer.so");
+        } catch (Throwable e) {
+            Log.e(TAG, "loadLibraries error", e);
+        }
+
+        view = LayoutInflater.from(mContext).inflate(R.layout.video_player, this, true);
+        contollerbar = findViewById(R.id.media_contoller);
+        mVideoView = (IjkVideoView) findViewById(R.id.main_video);
+        layout = (RelativeLayout) findViewById(R.id.layout);
+
         intentFilter = new IntentFilter();
         intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         changeReceiver = new ConnectionChangeReceiver();
 //        mContext.registerReceiver(changeReceiver,intentFilter);
-        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        initHeight = layout.getLayoutParams().height;
+
+        audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         screenWidthPixels = activity.getResources().getDisplayMetrics().widthPixels;
-        portrait = getScreenOrientation(activity) == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        iSportrait=portrait;
-        initView();
-        initAction();
 
-    }
 
-    private void initView() {
-
-        progressBar = (ProgressBar) view.findViewById(R.id.loading);
-        bottomProgress = (ProgressBar) view.findViewById(R.id.bottom_progressbar);
-        seekBar = (SeekBar) contollerbar.findViewById(R.id.seekbar);
-        allTime = (TextView) contollerbar.findViewById(R.id.all_time);
-        time = (TextView) contollerbar.findViewById(R.id.time);
-        full = (ImageView) contollerbar.findViewById(R.id.full);
-        sound = (ImageView) contollerbar.findViewById(R.id.sound);
-        play = (ImageView) contollerbar.findViewById(R.id.player_btn);
-        pauseImage = (ImageView) view.findViewById(R.id.pause_image);
-        appVideoPlay = (LinearLayout) view.findViewById(R.id.app_video_replay);
+        progressBar = (ProgressBar) findViewById(R.id.loading);
+        bottomProgress = (ProgressBar) findViewById(R.id.bottom_progressbar);
+        seekBar = (SeekBar) findViewById(R.id.seekbar);
+        allTime = (TextView) findViewById(R.id.all_time);
+        time = (TextView) findViewById(R.id.time);
+        full = (ImageView) findViewById(R.id.full);
+        sound = (ImageView) findViewById(R.id.sound);
+        play = (ImageView) findViewById(R.id.player_btn);
+        pauseImage = (ImageView) findViewById(R.id.pause_image);
+        appVideoPlay = (LinearLayout) findViewById(R.id.app_video_replay);
 
         //触屏
-        gestureTouch = (LinearLayout) view.findViewById(R.id.ll_gesture_touch);
-        gesture = (LinearLayout) view.findViewById(R.id.ll_gesture);
-        mTvCurrent = (TextView) view.findViewById(R.id.tv_current);
-        mTvDuration = (TextView) view.findViewById(R.id.tv_duration);
-        mImageTip = (ImageView) view.findViewById(R.id.image_tip);
-        mProgressGesture = (ProgressBar) view.findViewById(R.id.progressbar_gesture);
+        gestureTouch = (LinearLayout) findViewById(R.id.ll_gesture_touch);
+        gesture = (LinearLayout) findViewById(R.id.ll_gesture);
+        mTvCurrent = (TextView) findViewById(R.id.tv_current);
+        mTvDuration = (TextView) findViewById(R.id.tv_duration);
+        mImageTip = (ImageView) findViewById(R.id.image_tip);
+        mProgressGesture = (ProgressBar) findViewById(R.id.progressbar_gesture);
 
-//        brightness_layout = (LinearLayout) view.findViewById(R.id.brightness_layout);
-//        brightness_seek = (VSeekBar) view.findViewById(R.id.brightness_seek);
-//        sound_layout = (LinearLayout) view.findViewById(R.id.sound_layout);
-//        sound_seek = (VSeekBar) view.findViewById(R.id.sound_seek);
-//        show = (RelativeLayout) view.findViewById(R.id.show);
-//        seekTxt = (TextView) view.findViewById(R.id.seekTxt);
-
-
-        top_box = (RelativeLayout) view.findViewById(R.id.app_video_top_box);
-        mVideoFinish = (ImageView) view.findViewById(R.id.iv_video_finish);
-        mVideoTitle = (TextView) view.findViewById(R.id.tv_video_title);
-        mLockScreen = (ImageView) view.findViewById(R.id.iv_video_lockScreen);
+        //顶部
+        top_box = (RelativeLayout) findViewById(R.id.app_video_top_box);
+        mVideoFinish = (ImageView) findViewById(R.id.iv_video_finish);
+        mVideoTitle = (TextView) findViewById(R.id.tv_video_title);
+        mLockScreen = (ImageView) findViewById(R.id.iv_video_lockScreen);
 
     }
 
@@ -318,37 +327,9 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
         pauseImage.setOnClickListener(onClickListener);
         seekBar.setMax(1000);
         seekBar.setOnSeekBarChangeListener(mSeekListener);
-//        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//                String string = generateTime((long) (duration * progress * 1.0f / 1000));
-//                time.setText(string);
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//                setProgress();
-//                isDragging = true;
-//                audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-//                handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-//                show();
-//                handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//                isDragging = false;
-//                mVideoView.seekTo((int) (duration * seekBar.getProgress() * 1.0f / 1000));
-//                handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-//                audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-//                isDragging = false;
-//                handler.sendEmptyMessageDelayed(PlayStateParams.MESSAGE_SHOW_PROGRESS, 1000);
-//                show();
-//            }
-//        });
 
         layout.setClickable(true);
-        layout.setOnTouchListener(new View.OnTouchListener() {
+        layout.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (detector.onTouchEvent(event))
@@ -364,35 +345,6 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
             }
         });
 
-
-//        contollerbar.setClickable(false);
-//        contollerbar.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                Log.e(TAG, "event");
-//
-//                Rect seekRect = new Rect();
-//                seekBar.getHitRect(seekRect);
-//
-//
-//                if ((event.getY() >= (seekRect.top - 50)) && (event.getY() <= (seekRect.bottom + 50))) {
-//
-//                    float y = seekRect.top + seekRect.height() / 2;
-//                    //seekBar only accept relative x
-//                    float x = event.getX() - seekRect.left;
-//                    if (x < 0) {
-//                        x = 0;
-//                    } else if (x > seekRect.width()) {
-//                        x = seekRect.width();
-//                    }
-//                    MotionEvent me = MotionEvent.obtain(event.getDownTime(), event.getEventTime(),
-//                            event.getAction(), x, y, event.getMetaState());
-//                    return seekBar.onTouchEvent(me);
-//
-//                }
-//                return false;
-//            }
-//        });
 
         mVideoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
@@ -473,8 +425,7 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
             }
         };
 
-//        hideAll();
-        hide(false);
+        hideAll();
 
 
     }
@@ -483,9 +434,6 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
     private final SeekBar.OnSeekBarChangeListener mSeekListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//            String string = generateTime((long) (duration * progress * 1.0f / 1000));
-//            time.setText(string);
-
             if (!fromUser)
                 return;
             int position = (int) ((duration * progress * 1.0) / 1000);
@@ -506,13 +454,6 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
             if (instantSeeking) {
                 audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
             }
-
-//            setProgress();
-//            isDragging = true;
-//            audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-//            handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-//            show();
-//            handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
         }
 
         @Override
@@ -529,65 +470,43 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
             handler.sendEmptyMessageDelayed(PlayStateParams.MESSAGE_SHOW_PROGRESS, 1000);
 
 
-//            isDragging = false;
-//            mVideoView.seekTo((int) (duration * seekBar.getProgress() * 1.0f / 1000));
-//            handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-//            audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-//            isDragging = false;
-//            handler.sendEmptyMessageDelayed(PlayStateParams.MESSAGE_SHOW_PROGRESS, 1000);
-//            show();
         }
     };
 
-
-    //    private void hideAll()
-//    {
-//        setShowContollerbar(false);
-//        top_box.setVisibility(View.GONE);
-//        bottomProgress.setVisibility(View.VISIBLE);
-//        progressBar.setVisibility(View.GONE);
-//        hide(false);
-//    }
     private void statusChange(int newStatus) {
         status = newStatus;
-        status = newStatus;
         if (newStatus == PlayStateParams.STATE_PLAYBACK_COMPLETED) {
-//            mContext.unregisterReceiver(changeReceiver);
+            mContext.unregisterReceiver(changeReceiver);
             Log.d(TAG, "STATE_PLAYBACK_COMPLETED");
             handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-//            hideAll();
-            hide(false);
+            hideAll();
             bottomProgress.setProgress(0);
             isShowContoller = false;
             appVideoPlay.setVisibility(View.VISIBLE);
-//            mReplay.setVisibility(View.VISIBLE);
-//            handler.sendEmptyMessage(9);
 
         } else if (newStatus == PlayStateParams.STATE_ERROR) {
+            mContext.unregisterReceiver(changeReceiver);
             Log.d(TAG, "STATE_ERROR");
-//            mContext.unregisterReceiver(changeReceiver);
             bottomProgress.setProgress(0);
+            isShowContoller = false;
             handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-            hide(false);
+            hideAll();
         } else if (newStatus == PlayStateParams.STATE_PREPARING) {
+            mContext.registerReceiver(changeReceiver,intentFilter);
             Log.d(TAG, "STATE_PREPARING");
-//            bottomProgress.setProgress(0);
-            hide(false);
+            hideAll();
             if (progressBar.getVisibility() == View.GONE)
                 progressBar.setVisibility(View.VISIBLE);
         } else if (newStatus == PlayStateParams.STATE_PLAYING) {
-//            mContext.registerReceiver(changeReceiver,intentFilter);
-            Log.d(TAG, "STATE_PLAYING");
-            hide(false);
-            progressBar.setVisibility(View.GONE);
 
+            Log.d(TAG, "STATE_PLAYING");
+            hideAll();
+            progressBar.setVisibility(View.GONE);
             isShowContoller = true;
             play.setVisibility(View.VISIBLE);
-            if (!MediaUtils.isNetworkAvailable(mContext) && MediaUtils.isConnectionAvailable(mContext) && !isAllowModible) {
-                mVideoView.pause();
-                handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-                showWifiDialog();
-            }
+            bottomProgress.setVisibility(View.VISIBLE);
+            handler.sendEmptyMessage(PlayStateParams.MESSAGE_SHOW_PROGRESS);
+
 
         }
 
@@ -597,45 +516,92 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
     /**
      * 退出全屏
      */
-    public void quitFullScreen() {
+    private void quitFullScreen() {
         if (getScreenOrientation(activity) == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else
             activity.finish();
     }
 
-    public void setFixed(boolean isFixedTool)
-    {
-        this.isFixedTool=isFixedTool;
-    }
+
     /**
      * 展示控制面板
      *
      * @param show
      */
-    public void setShowContollerbar(boolean show) {
-        contollerbar.setVisibility(show ? View.VISIBLE : View.GONE);
+    private void setShowContollerbar(boolean show) {
+        setVisibility(show ? View.VISIBLE : View.GONE);
 
     }
 
-    private void hide(boolean show) {
-        if (!isFixedTool)
-        {
-            if (!iSportrait)
-                 top_box.setVisibility(show ? View.VISIBLE : View.GONE);
-            else
-            {
-                top_box.setVisibility(View.GONE);
-            }
-        }
-        else
-        {
-            top_box.setVisibility(View.VISIBLE);
-        }
-        bottomProgress.setVisibility(show ? View.GONE : View.VISIBLE);
+    private void hideAll() {
+        top_box.setVisibility(View.GONE);
+        showBottomControl(false);
+        progressBar.setVisibility(View.GONE);
         appVideoPlay.setVisibility(View.GONE);
-        setShowContollerbar(show);
+        bottomProgress.setVisibility(View.GONE);
+    }
+
+    private void showBottomControl(boolean show) {
+        contollerbar.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+
+    private void hide(boolean show) {
+//        if (!isFixedTool) {
+//            if (!iSportrait)
+//                top_box.setVisibility(show ? View.VISIBLE : View.GONE);
+//            else {
+//                top_box.setVisibility(View.GONE);
+//            }
+//        } else {
+//            top_box.setVisibility(View.VISIBLE);
+//        }
+
+        if (!portrait)
+            top_box.setVisibility(show ? View.VISIBLE : View.GONE);
+
+        showBottomControl(show);
+        bottomProgress.setVisibility(show ? View.GONE : View.VISIBLE);
         updatePausePlay();
+    }
+
+    private void hide() {
+        Log.d(TAG, "hide");
+        if (isShow) {
+//            handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
+            isShow = false;
+            handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
+            hide(false);
+
+
+        }
+    }
+
+
+    private void show(int timeout) {
+        if (!isShowContoller)
+            return;
+        if (!isShow)
+            isShow = true;
+        progressBar.setVisibility(View.GONE);
+        hide(true);
+        handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
+        if (timeout != 0 && mVideoView.isPlaying()) {
+            handler.sendMessageDelayed(handler.obtainMessage(PlayStateParams.SET_VIEW_HIDE), timeout);
+        }
+    }
+
+    private void show() {
+//        Log.d(TAG, "show" + isShow + "isShowContoller" + isShowContoller + "position:" + newPosition);
+//        if (!isShowContoller)
+//            return;
+//        if (!isShow)
+//            isShow = true;
+//        progressBar.setVisibility(View.GONE);
+//        hide(true);
+//        handler.sendEmptyMessage(PlayStateParams.MESSAGE_SHOW_PROGRESS);
+
     }
 
 
@@ -644,9 +610,9 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
      *
      * @param portrait
      */
-    public void doOnConfigurationChanged(final boolean portrait) {
+    private void doOnConfigurationChanged(final boolean portrait) {
 
-        iSportrait=portrait;
+        iSportrait = portrait;
         if (mVideoView != null) {
             handler.post(new Runnable() {
                 @Override
@@ -696,14 +662,14 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
 //        View view = LayoutInflater.from(mContext).inflate(R.layout.item_dialog, null);
 //        builder.setView(view);
 //        builder.create();
-//        view.findViewById(R.id.tv_pause).setOnClickListener(new View.OnClickListener() {
+//       findViewById(R.id.tv_pause).setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
 ////                alertDialog.dismiss();
 //                builder.create().dismiss();
 //            }
 //        });
-//        view.findViewById(R.id.tv_continue_play).setOnClickListener(new View.OnClickListener() {
+//       findViewById(R.id.tv_continue_play).setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
 ////                alertDialog.dismiss();
@@ -723,7 +689,7 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
     /**
      * 更新全屏按钮
      */
-    public void updateFullScreenButton() {
+    private void updateFullScreenButton() {
         if (getScreenOrientation((Activity) mContext) == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             full.setImageResource(R.mipmap.ic_fullscreen_exit);
         } else {
@@ -742,67 +708,8 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
         }
     }
 
-    public void start() {
-        isShowContoller=false;
-        bottomProgress.setProgress(0);
-        hide(false);
-        progressBar.setVisibility(View.VISIBLE);
-        bottomProgress.setVisibility(View.VISIBLE);
 
-
-    }
-
-    public void pause() {
-        play.setImageResource(R.drawable.play_selector);
-        mVideoView.pause();
-        bitmap = mVideoView.getBitmap();
-        if (bitmap != null) {
-            pauseImage.setImageBitmap(bitmap);
-            appVideoPlay.setVisibility(View.VISIBLE);
-        }
-    }
-
-
-    public void onDestory() {
-        handler.removeCallbacksAndMessages(null);
-        mVideoView.stopPlayback();
-    }
-
-    public void onResume() {
-        if (status == PlayStateParams.STATE_PAUSED) {
-            if (currentPosition > 0) {
-                mVideoView.seekTo((int) currentPosition);
-            }
-            mVideoView.start();
-            statusChange(PlayStateParams.STATE_PLAYING);
-        }
-    }
-
-    public void onPause() {
-        show(0);//把系统状态栏显示出来
-        if (status == PlayStateParams.STATE_PLAYING) {
-            mVideoView.pause();
-            currentPosition = mVideoView.getCurrentPosition();
-            statusChange(PlayStateParams.STATE_PAUSED);
-        }
-    }
-
-    public void reStart() {
-        play.setImageResource(R.drawable.pause_selector);
-        mVideoView.start();
-        if (bitmap != null) {
-            handler.sendEmptyMessageDelayed(PlayStateParams.PAUSE_IMAGE_HIDE, 100);
-            bitmap.recycle();
-            bitmap = null;
-        }
-    }
-
-    public void setShowContoller(boolean isShowContoller) {
-        this.isShowContoller = isShowContoller;
-        handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
-    }
-
-    public int getScreenOrientation(Activity activity) {
+    private int getScreenOrientation(Activity activity) {
         int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
         DisplayMetrics dm = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -870,12 +777,8 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
         return hours > 0 ? String.format("%02d:%02d:%02d", hours, minutes, seconds) : String.format("%02d:%02d", minutes, seconds);
     }
 
-    public void setVisiable() {
-        show();
-    }
 
     private long setProgress() {
-//        Log.v(TAG,"setProgress");
         if (isDragging) {
             return 0;
         }
@@ -900,16 +803,6 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
         return position;
     }
 
-
-    private VedioIsPause vedioIsPause;
-
-    public interface VedioIsPause {
-        void pause(boolean pause);
-    }
-
-    public void setPauseImageHide() {
-        appVideoPlay.setVisibility(View.GONE);
-    }
 
     public class PlayGestureListener extends GestureDetector.SimpleOnGestureListener {
 
@@ -937,47 +830,27 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
             } else {
                 return super.onDown(e);
             }
-//            return super.onDown(e);
         }
-//        /**
-//         * 单击
-//         *
-//         * @param e
-//         * @return
-//         */
-//        @Override
-//        public boolean onSingleTapUp(MotionEvent e) {
-//            Log.d(TAG,"onSingleTapUp"+isShow);
-//            if (isShow) {
-//                hide();
-//            } else {
-//                show(PlayStateParams.TIME_OUT);
-//            }
-//            return true;
-//        }
+
+        /**
+         * 单击
+         *
+         * @param e
+         * @return
+         */
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            Log.d(TAG, "onSingleTapUp" + isShow);
+            if (isShow) {
+                hide();
+            } else {
+                show(PlayStateParams.TIME_OUT);
+            }
+            return true;
+        }
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-
-//            float x = e1.getX() - e2.getX();
-//            float y = e1.getY() - e2.getY();
-//            if (firstTouch) {
-//                seek = Math.abs(distanceX) >= Math.abs(distanceY);
-//                volumeControl = e1.getX() < mVideoView.getMeasuredWidth() * 0.5;
-//                firstTouch = false;
-//            }
-//            contollerbar.setVisibility(View.GONE);
-//            if (seek) {
-//                onProgressSlide(-x / mVideoView.getWidth(), e1.getX() / mVideoView.getWidth());
-//            } else {
-//                float percent = y / mVideoView.getHeight();
-//                if (volumeControl) {
-//                    onVolumeSlide(percent);
-//                } else {
-//                    onBrightnessSlide(percent);
-//                }
-//            }
-
             float mOldX = e1.getX(), mOldY = e1.getY();
             float deltaY = mOldY - e2.getY();
             float deltaX = mOldX - e2.getX();
@@ -988,7 +861,6 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
             }
             contollerbar.setVisibility(View.GONE);
             if (seek) {
-
                 onProgressSlide(-deltaX / mVideoView.getWidth());
             } else {
                 float percent = deltaY / mVideoView.getHeight();
@@ -1010,78 +882,6 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
     }
 
 
-    @Override
-    public void hide() {
-        Log.d(TAG, "hide");
-        if (isShow) {
-//            handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-            isShow = false;
-            handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
-//            contollerbar.setVisibility(View.GONE);
-//            bottomProgress.setVisibility(View.VISIBLE);
-//            top_box.setVisibility(View.GONE);
-            hide(false);
-
-
-        }
-    }
-
-
-    @Override
-    public boolean isShowing() {
-        return isShow;
-    }
-
-    @Override
-    public void setAnchorView(View view) {
-
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-
-    }
-
-    @Override
-    public void setMediaPlayer(MediaController.MediaPlayerControl player) {
-
-    }
-
-    @Override
-    public void show(int timeout) {
-        Log.d(TAG, "show timeout");
-//        handler.sendEmptyMessageDelayed(PlayStateParams.SET_VIEW_HIDE, timeout);
-        handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
-        if (timeout != 0 && mVideoView.isPlaying()) {
-            Log.d(TAG, "isplay");
-            handler.sendMessageDelayed(handler.obtainMessage(PlayStateParams.SET_VIEW_HIDE), timeout);
-        }
-    }
-
-    @Override
-    public void show() {
-        Log.d(TAG, "show" + isShow + "isShowContoller" + isShowContoller + "position:" + newPosition);
-        if (!isShowContoller)
-            return;
-        if (!isShow)
-            isShow = true;
-        progressBar.setVisibility(View.GONE);
-//        contollerbar.setVisibility(View.VISIBLE);
-//        bottomProgress.setVisibility(View.GONE);
-        hide(true);
-//        updatePausePlay();
-//        top_box.setVisibility(View.VISIBLE);
-        handler.sendEmptyMessage(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-//        show(PlayStateParams.TIME_OUT);
-
-    }
-
-    @Override
-    public void showOnce(View view) {
-
-    }
-
-
     /**
      * 手势结束
      */
@@ -1096,27 +896,6 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
         handler.removeMessages(PlayStateParams.MESSAGE_HIDE_CONTOLL);
         handler.sendEmptyMessageDelayed(PlayStateParams.MESSAGE_HIDE_CONTOLL, 500);
 
-    }
-
-
-    public void showWifiDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setMessage(mContext.getResources().getString(R.string.tips_not_wifi));
-        builder.setPositiveButton(mContext.getResources().getString(R.string.tips_not_wifi_confirm), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-//                startPlayLogic();
-//                WIFI_TIP_DIALOG_SHOWED = true;
-            }
-        });
-        builder.setNegativeButton(mContext.getResources().getString(R.string.tips_not_wifi_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.create().show();
     }
 
 
@@ -1141,9 +920,6 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
 
         // 变更声音
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, index, 0);
-//
-//        if (sound_layout.getVisibility() == View.GONE)
-//            sound_layout.setVisibility(View.VISIBLE);
         // 变更进度条
         int i = (int) (index * 1.0f / mMaxVolume * 100);
         if (i == 0) {
@@ -1236,6 +1012,200 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
 
     }
 
+    private void start() {
+//        ViewGroup last = (ViewGroup) this.getParent();//找到videoitemview的父类，然后remove
+//        if (last != null) {
+//            last.removeAllViews();
+//        }
+        isShowContoller = false;
+        bottomProgress.setProgress(0);
+        progressBar.setVisibility(View.VISIBLE);
+        hide(false);
+
+
+
+    }
+
+    private void pause() {
+        play.setImageResource(R.drawable.play_selector);
+        mVideoView.pause();
+        bitmap = mVideoView.getBitmap();
+        if (bitmap != null) {
+            pauseImage.setImageBitmap(bitmap);
+            appVideoPlay.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void reStart() {
+        play.setImageResource(R.drawable.pause_selector);
+        mVideoView.start();
+        if (bitmap != null) {
+            handler.sendEmptyMessageDelayed(PlayStateParams.PAUSE_IMAGE_HIDE, 100);
+            bitmap.recycle();
+            bitmap = null;
+        }
+    }
+
+
+    //==========================对外提供接口==============================
+
+    public boolean isPlay() {
+        return mVideoView.isPlaying();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (getScreenOrientation((Activity) mContext) == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            return true;
+        }
+        return false;
+    }
+
+
+    public void showWifiDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setMessage(mContext.getResources().getString(R.string.tips_not_wifi));
+        builder.setPositiveButton(mContext.getResources().getString(R.string.tips_not_wifi_confirm), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                isAllowModible=true;
+                start();
+                mVideoView.start();
+
+//                startPlayLogic();
+//                WIFI_TIP_DIALOG_SHOWED = true;
+            }
+        });
+        builder.setNegativeButton(mContext.getResources().getString(R.string.tips_not_wifi_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                isAllowModible=false;
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
+
+    public boolean isShowing() {
+        return isShow;
+    }
+
+    public void setVisiable() {
+        show();
+    }
+//
+//    private VedioIsPause vedioIsPause;
+//
+//    public interface VedioIsPause {
+//        void pause(boolean pause);
+//    }
+
+    public void stop() {
+        if (mVideoView.isPlaying()) {
+            mVideoView.stopPlayback();
+        }
+    }
+
+    public void release() {
+        if (mVideoView != null)
+            mVideoView.release(true);
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setPauseImageHide() {
+        appVideoPlay.setVisibility(View.GONE);
+    }
+
+    public void onDestory() {
+        orientationEventListener.disable();
+        handler.removeCallbacksAndMessages(null);
+        mVideoView.stopPlayback();
+    }
+
+    public void onResume() {
+        orientationEventListener.enable();
+        mVideoView.resume();
+        if (status == PlayStateParams.STATE_PAUSED) {
+            if (currentPosition > 0) {
+                mVideoView.seekTo((int) currentPosition);
+            }
+            mVideoView.start();
+            statusChange(PlayStateParams.STATE_PLAYING);
+        }
+    }
+
+    public void onPause() {
+        show(0);//把系统状态栏显示出来
+        if (status == PlayStateParams.STATE_PLAYING) {
+            mVideoView.pause();
+            currentPosition = mVideoView.getCurrentPosition();
+            statusChange(PlayStateParams.STATE_PAUSED);
+        }
+    }
+
+
+    public void setShowContoller(boolean isShowContoller) {
+        this.isShowContoller = isShowContoller;
+        handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
+    }
+
+
+    public void setFixed(boolean isFixedTool) {
+        this.isFixedTool = isFixedTool;
+    }
+
+    public void start(String path) {
+        Uri uri = Uri.parse(path);
+        if (!mVideoView.isPlaying()) {
+            mVideoView.setVideoURI(uri);
+        } else {
+            mVideoView.stopPlayback();
+            mVideoView.setVideoURI(uri);
+        }
+        if (MediaUtils.isNetworkAvailable(mContext) || MediaUtils.isConnectionAvailable(mContext) && isAllowModible) {
+            start();
+            mVideoView.start();
+        }
+        else
+            showWifiDialog();
+
+        }
+
+
+    /**
+     * 设置标题
+     *
+     * @param str
+     */
+    public void setTitle(String str) {
+        if (mVideoView == null)
+            return;
+        mVideoTitle.setText(str);
+
+    }
+
+    /**
+     * 是否显示左上导航图标(一般有actionbar or appToolbar时需要隐藏)
+     *
+     * @param show
+     */
+    public void setShowNavIcon(boolean show) {
+        mVideoFinish.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    public void onChanged(Configuration configuration) {
+        portrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT;
+        doOnConfigurationChanged(portrait);
+
+    }
+
+    //============================网络监听================================
 
     class ConnectionChangeReceiver extends BroadcastReceiver {
         private final String TAG = ConnectionChangeReceiver.class.getSimpleName();
@@ -1262,13 +1232,14 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
             } else
                 isMobile = false;
             //如果没有连接成功
-            if (!isWifi && isMobile) {
-
+            if (!isWifi && isMobile&&mVideoView!=null&&mVideoView.isPlaying()) {
                 pause();
+                showWifiDialog();
 //                show();
 
             } else if (!isWifi && !isMobile) {
                 pause();
+
 //                show();
 //                handler.sendEmptyMessage(PlayStateParams.MESSAGE_SHOW_DIALOG);
                 Toast.makeText(context, "当前网络无连接", Toast.LENGTH_SHORT).show();
@@ -1280,6 +1251,8 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
 
     }
 
+    //============================外部接口====================================
+
     public interface OnErrorListener {
         void onError(int what, int extra);
     }
@@ -1287,6 +1260,7 @@ public class CustomMediaContoller extends FrameLayout implements IMediaControlle
     private OnErrorListener onErrorListener = new OnErrorListener() {
         @Override
         public void onError(int what, int extra) {
+
         }
     };
 

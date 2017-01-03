@@ -8,39 +8,36 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.github.jinsedeyuzhou.PlayerManager;
+import com.github.jinsedeyuzhou.VPlayPlayer;
 import com.github.jinsedeyuzhou.view.CustomDialog;
-import com.github.jinsedeyuzhou.view.VPlayerView;
 
 public class MainActivity extends AppCompatActivity {
-    private String url="http://gslb.miaopai.com/stream/4YUE0MlhLclpX3HIeA273g__.mp4?yx=&refer=weibo_app";
-    private  int mporit;
+    private String url = "http://gslb.miaopai.com/stream/4YUE0MlhLclpX3HIeA273g__.mp4?yx=&refer=weibo_app";
     private FrameLayout content;
-    private VPlayerView vp;
+    private VPlayPlayer vp;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
-        vp = new VPlayerView(this);
-
+        content = (FrameLayout) findViewById(R.id.fl_content);
+        vp = PlayerManager.getPlayerManager().initialize(this);
         vp.setShowNavIcon(true);
         vp.setTitle(url);
+        if (vp.getParent() != null)
+            ((ViewGroup) vp.getParent()).removeAllViews();
+        content.addView(vp);
         vp.start(url);
 
-//        vp.setTitle(url);
-        content = (FrameLayout) findViewById(R.id.fl_content);
-        mporit= content.getLayoutParams().height;
-        content.addView(vp);
         findViewById(R.id.btn_video).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(getApplicationContext(),VideoListActivity.class);
+                Intent intent = new Intent(getApplicationContext(), VideoListActivity.class);
                 startActivity(intent);
 
 
@@ -81,25 +78,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        vp.onChanged(newConfig);
+        if (vp != null)
+            vp.onChanged(newConfig);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        vp.onResume();
+        if (vp != null)
+            vp.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        vp.onPause();
+        if (vp != null)
+            vp.onPause();
 
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        vp.onDestroy();
+        if (vp != null)
+            vp.onDestory();
     }
 }

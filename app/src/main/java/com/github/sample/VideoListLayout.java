@@ -131,12 +131,12 @@ public class VideoListLayout extends RelativeLayout {
                     smallLayout.setVisibility(View.GONE);
                     videoItemView.setShowContoller(true);
                 }
-//                else if (fullScreen.getVisibility()==View.VISIBLE)
-//                {
-//                    fullScreen.removeAllViews();
-//                    fullScreen.setVisibility(View.GONE);
-//                    videoItemView.setShowContoller(true);
-//                }
+                else if (fullScreen.getVisibility()==View.VISIBLE)
+                {
+                    fullScreen.removeAllViews();
+                    fullScreen.setVisibility(View.GONE);
+                    videoItemView.setShowContoller(true);
+                }
 
                 FrameLayout frameLayout = (FrameLayout) videoItemView.getParent();
                 videoItemView.release();
@@ -175,7 +175,6 @@ public class VideoListLayout extends RelativeLayout {
                 }
 
                 if (lastPostion != -1)
-
                 {
                     ViewGroup last = (ViewGroup) videoItemView.getParent();//找到videoitemview的父类，然后remove
                     if (last != null) {
