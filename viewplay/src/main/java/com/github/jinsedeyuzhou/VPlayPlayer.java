@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -187,7 +188,7 @@ public class VPlayPlayer extends RelativeLayout {
                     } else {
                         reStart();
                     }
-                } else  {
+                } else {
 //                    handler.sendEmptyMessage(PlayStateParams.MESSAGE_SHOW_DIALOG);
                     showWifiDialog();
                 }
@@ -345,6 +346,33 @@ public class VPlayPlayer extends RelativeLayout {
             }
         });
 
+        contollerbar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.e("custommedia", "event");
+
+                Rect seekRect = new Rect();
+                seekBar.getHitRect(seekRect);
+
+                if ((event.getY() >= (seekRect.top - 50)) && (event.getY() <= (seekRect.bottom + 50))) {
+
+                    float y = seekRect.top + seekRect.height() / 2;
+                    //seekBar only accept relative x
+                    float x = event.getX() - seekRect.left;
+                    if (x < 0) {
+                        x = 0;
+                    } else if (x > seekRect.width()) {
+                        x = seekRect.width();
+                    }
+                    MotionEvent me = MotionEvent.obtain(event.getDownTime(), event.getEventTime(),
+                            event.getAction(), x, y, event.getMetaState());
+                    return seekBar.onTouchEvent(me);
+
+                }
+                return false;
+            }
+        });
+
 
         mVideoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
@@ -458,8 +486,6 @@ public class VPlayPlayer extends RelativeLayout {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-
-
             if (!instantSeeking) {
                 mVideoView.seekTo((int) ((duration * seekBar.getProgress() * 1.0) / 1000));
             }
@@ -468,8 +494,6 @@ public class VPlayPlayer extends RelativeLayout {
             audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
             isDragging = false;
             handler.sendEmptyMessageDelayed(PlayStateParams.MESSAGE_SHOW_PROGRESS, 1000);
-
-
         }
     };
 
@@ -478,29 +502,29 @@ public class VPlayPlayer extends RelativeLayout {
         if (newStatus == PlayStateParams.STATE_PLAYBACK_COMPLETED) {
             mContext.unregisterReceiver(changeReceiver);
             Log.d(TAG, "STATE_PLAYBACK_COMPLETED");
-            handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-            hideAll();
             bottomProgress.setProgress(0);
             isShowContoller = false;
+            hideAll();
             appVideoPlay.setVisibility(View.VISIBLE);
+            handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
+            handler.removeCallbacksAndMessages(null);
 
         } else if (newStatus == PlayStateParams.STATE_ERROR) {
             mContext.unregisterReceiver(changeReceiver);
             Log.d(TAG, "STATE_ERROR");
             bottomProgress.setProgress(0);
             isShowContoller = false;
+            hideAll();
             handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
-            hideAll();
         } else if (newStatus == PlayStateParams.STATE_PREPARING) {
-            mContext.registerReceiver(changeReceiver,intentFilter);
+            mContext.registerReceiver(changeReceiver, intentFilter);
             Log.d(TAG, "STATE_PREPARING");
-            hideAll();
+            play.setVisibility(View.GONE);
             if (progressBar.getVisibility() == View.GONE)
                 progressBar.setVisibility(View.VISIBLE);
         } else if (newStatus == PlayStateParams.STATE_PLAYING) {
 
             Log.d(TAG, "STATE_PLAYING");
-            hideAll();
             progressBar.setVisibility(View.GONE);
             isShowContoller = true;
             play.setVisibility(View.VISIBLE);
@@ -1023,17 +1047,16 @@ public class VPlayPlayer extends RelativeLayout {
         hide(false);
 
 
-
     }
 
     private void pause() {
         play.setImageResource(R.drawable.play_selector);
         mVideoView.pause();
-        bitmap = mVideoView.getBitmap();
-        if (bitmap != null) {
-            pauseImage.setImageBitmap(bitmap);
-            appVideoPlay.setVisibility(View.VISIBLE);
-        }
+//        bitmap = mVideoView.getBitmap();
+//        if (bitmap != null) {
+//            pauseImage.setImageBitmap(bitmap);
+//            appVideoPlay.setVisibility(View.VISIBLE);
+//        }
     }
 
     private void reStart() {
@@ -1070,7 +1093,7 @@ public class VPlayPlayer extends RelativeLayout {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                isAllowModible=true;
+                isAllowModible = true;
                 start();
                 mVideoView.start();
 
@@ -1081,7 +1104,7 @@ public class VPlayPlayer extends RelativeLayout {
         builder.setNegativeButton(mContext.getResources().getString(R.string.tips_not_wifi_cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                isAllowModible=false;
+                isAllowModible = false;
                 dialog.dismiss();
             }
         });
@@ -1171,11 +1194,10 @@ public class VPlayPlayer extends RelativeLayout {
         if (MediaUtils.isNetworkAvailable(mContext) || MediaUtils.isConnectionAvailable(mContext) && isAllowModible) {
             start();
             mVideoView.start();
-        }
-        else
+        } else
             showWifiDialog();
 
-        }
+    }
 
 
     /**
@@ -1232,7 +1254,7 @@ public class VPlayPlayer extends RelativeLayout {
             } else
                 isMobile = false;
             //如果没有连接成功
-            if (!isWifi && isMobile&&mVideoView!=null&&mVideoView.isPlaying()) {
+            if (!isWifi && isMobile && mVideoView != null && mVideoView.isPlaying()) {
                 pause();
                 showWifiDialog();
 //                show();
