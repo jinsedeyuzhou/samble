@@ -1,6 +1,5 @@
 package com.github.sample;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -13,7 +12,6 @@ import android.widget.FrameLayout;
 
 import com.github.jinsedeyuzhou.PlayerManager;
 import com.github.jinsedeyuzhou.VPlayPlayer;
-import com.github.jinsedeyuzhou.view.CustomDialog;
 
 public class MainActivity extends AppCompatActivity {
     private String url = "http://gslb.miaopai.com/stream/4YUE0MlhLclpX3HIeA273g__.mp4?yx=&refer=weibo_app";
@@ -32,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         if (vp.getParent() != null)
             ((ViewGroup) vp.getParent()).removeAllViews();
         content.addView(vp);
-        vp.start(url);
+        vp.play(url);
 
         findViewById(R.id.btn_video).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,24 +42,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        CustomDialog.Builder builder = new CustomDialog.Builder(this);
-        builder.setMessage("这个就是自定义的提示框");
-        builder.setTitle("提示");
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                //设置你的操作事项
-            }
-        });
-
-        builder.setNegativeButton("取消",
-                new android.content.DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-
-        builder.create().show();
+//        CustomDialog.Builder builder = new CustomDialog.Builder(this);
+//        builder.setMessage("这个就是自定义的提示框");
+//        builder.setTitle("提示");
+//        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int which) {
+//                dialog.dismiss();
+//                //设置你的操作事项
+//            }
+//        });
+//
+//        builder.setNegativeButton("取消",
+//                new android.content.DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.dismiss();
+//                    }
+//                });
+//
+//        builder.create().show();
     }
 
     @Override

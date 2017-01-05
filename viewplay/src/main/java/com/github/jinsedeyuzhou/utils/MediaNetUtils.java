@@ -8,7 +8,7 @@ import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
-public class MediaUtils {
+public class MediaNetUtils {
 
 
     /**
@@ -42,7 +42,7 @@ public class MediaUtils {
                 case TelephonyManager.NETWORK_TYPE_1xRTT:
                 case TelephonyManager.NETWORK_TYPE_IDEN:
                     /** 2G网络 */
-                    return 4;
+
                 case TelephonyManager.NETWORK_TYPE_UMTS:
                 case TelephonyManager.NETWORK_TYPE_EVDO_0:
                 case TelephonyManager.NETWORK_TYPE_EVDO_A:
@@ -53,7 +53,6 @@ public class MediaUtils {
                 case TelephonyManager.NETWORK_TYPE_EHRPD:
                 case TelephonyManager.NETWORK_TYPE_HSPAP:
                     /** 3G网络 */
-                    return 5;
                 case TelephonyManager.NETWORK_TYPE_LTE:
                     /** 4G网络 */
                     return 6;
