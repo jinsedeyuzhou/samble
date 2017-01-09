@@ -1,4 +1,4 @@
-package com.github.jinsedeyuzhou.view;
+package com.github.jinsedeyuzhou;
 
 /**
  * Created by Berkeley on 11/2/16.

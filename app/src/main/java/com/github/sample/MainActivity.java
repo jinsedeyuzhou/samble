@@ -1,16 +1,12 @@
 package com.github.sample;
 
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.github.jinsedeyuzhou.PlayerManager;
 import com.github.jinsedeyuzhou.VPlayPlayer;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         content = (FrameLayout) findViewById(R.id.fl_content);
-        vp = PlayerManager.getPlayerManager().initialize(this);
+        vp = new VPlayPlayer(this);
         vp.setShowNavIcon(true);
         vp.setTitle(url);
         if (vp.getParent() != null)
@@ -32,15 +28,6 @@ public class MainActivity extends AppCompatActivity {
         content.addView(vp);
         vp.play(url);
 
-        findViewById(R.id.btn_video).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), VideoListActivity.class);
-                startActivity(intent);
-
-
-            }
-        });
 
 //        CustomDialog.Builder builder = new CustomDialog.Builder(this);
 //        builder.setMessage("这个就是自定义的提示框");
@@ -62,15 +49,13 @@ public class MainActivity extends AppCompatActivity {
 //        builder.create().show();
     }
 
+
+
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                return true;
-            }
-        }
-        return super.onKeyUp(keyCode, event);
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (vp!=null)
+            vp.onKeyDown(keyCode,event);
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
