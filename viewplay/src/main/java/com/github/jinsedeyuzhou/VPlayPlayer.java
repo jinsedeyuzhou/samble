@@ -16,6 +16,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -27,6 +29,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -37,6 +40,7 @@ import android.widget.Toast;
 
 import com.github.jinsedeyuzhou.media.IjkVideoView;
 import com.github.jinsedeyuzhou.utils.MediaNetUtils;
+import com.github.jinsedeyuzhou.view.MarqueeTextView;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -44,7 +48,7 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 /**
  * Created by Berkeley on 11/2/16.
  */
-public class VPlayPlayer extends RelativeLayout {
+public class VPlayPlayer extends FrameLayout {
 
     private static final String TAG = "VPlayPlayer";
     private Context mContext;
@@ -64,7 +68,7 @@ public class VPlayPlayer extends RelativeLayout {
     private Bitmap bitmap;
     private RelativeLayout top_box;
     private ImageView mVideoFinish;
-    private TextView mVideoTitle;
+    private MarqueeTextView  mVideoTitle;
 
     private ProgressBar bottomProgress;
     private LinearLayout gestureTouch;
@@ -97,7 +101,7 @@ public class VPlayPlayer extends RelativeLayout {
     private boolean portrait;
     //屏幕宽度
     private int screenWidthPixels;
-    public static int initHeight;
+    public  int initHeight;
     //播放状态
     private int status = PlayStateParams.STATE_IDLE;
 
@@ -250,10 +254,6 @@ public class VPlayPlayer extends RelativeLayout {
         mVideoView = (IjkVideoView) findViewById(R.id.main_video);
         layout = (RelativeLayout) findViewById(R.id.layout);
 
-        initHeight = layout.getLayoutParams().height;
-        screenWidthPixels = activity.getResources().getDisplayMetrics().widthPixels;
-
-
         progressBar = (ProgressBar) findViewById(R.id.loading);
         bottomProgress = (ProgressBar) findViewById(R.id.bottom_progressbar);
         seekBar = (SeekBar) findViewById(R.id.seekbar);
@@ -277,10 +277,21 @@ public class VPlayPlayer extends RelativeLayout {
         //顶部
         top_box = (RelativeLayout) findViewById(R.id.app_video_top_box);
         mVideoFinish = (ImageView) findViewById(R.id.iv_video_finish);
-        mVideoTitle = (TextView) findViewById(R.id.tv_video_title);
+        mVideoTitle = (MarqueeTextView ) findViewById(R.id.tv_video_title);
         mVideoLock = (ImageView) findViewById(R.id.app_video_lock);
         mVideoShare = (ImageView) findViewById(R.id.app_video_share);
+//        initHeight = getLayoutParams().height;
+//        screenWidthPixels = activity.getResources().getDisplayMetrics().widthPixels;
 
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (initHeight == 0) {
+            initHeight = getHeight();
+            screenWidthPixels = getResources().getDisplayMetrics().widthPixels;
+        }
     }
 
     private void initAction() {
@@ -327,7 +338,9 @@ public class VPlayPlayer extends RelativeLayout {
         audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mMaxVolume = ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
                 .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-
+        int statusFlag =(audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT) ? 1: 0;
+        if (statusFlag==0)
+            sound.setImageResource(R.mipmap.sound_mult_icon);
 
         mVideoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
@@ -433,6 +446,7 @@ public class VPlayPlayer extends RelativeLayout {
         orientationEventListener.disable();
         portrait = getScreenOrientation(activity) == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         hideAll();
+
         /**
          * 不支持此设备
          */
@@ -527,6 +541,7 @@ public class VPlayPlayer extends RelativeLayout {
         } else if (newStatus == PlayStateParams.STATE_PREPARING) {
             Log.d(TAG, "STATE_PREPARING");
             play.setVisibility(View.GONE);
+            isShowContoller = false;
             if (progressBar.getVisibility() == View.GONE)
                 progressBar.setVisibility(View.VISIBLE);
         } else if (newStatus == PlayStateParams.STATE_PLAYING) {
@@ -560,7 +575,7 @@ public class VPlayPlayer extends RelativeLayout {
      *
      * @param show
      */
-    private void setShowContollerbar(boolean show) {
+    public void setShowContollerbar(boolean show) {
         setVisibility(show ? View.VISIBLE : View.GONE);
 
     }
@@ -572,7 +587,7 @@ public class VPlayPlayer extends RelativeLayout {
         appVideoPlay.setVisibility(View.GONE);
     }
 
-    private void showBottomControl(boolean show) {
+    public void showBottomControl(boolean show) {
         contollerbar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
@@ -602,6 +617,7 @@ public class VPlayPlayer extends RelativeLayout {
         if (!isShow)
             isShow = true;
         progressBar.setVisibility(View.GONE);
+        play.setVisibility(View.VISIBLE);
         hide(true);
         handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
         if (timeout != 0 && mVideoView.isPlaying()) {
@@ -625,20 +641,19 @@ public class VPlayPlayer extends RelativeLayout {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    setFullScreen(!portrait);
+                    tryFullScreen(!portrait);
+                    ViewGroup.LayoutParams params = getLayoutParams();
                     if (portrait) {
                         top_box.setVisibility(View.GONE);
                         Log.v(TAG, "initHeight" + initHeight);
-                        ViewGroup.LayoutParams params = layout.getLayoutParams();
                         params.height = initHeight;
-                        layout.setLayoutParams(params);
+                        setLayoutParams(params);
                         Log.v(TAG, "initHeight" + MediaNetUtils.dip2px(activity, initHeight));
-                        top_box.setVisibility(View.GONE);
 
                     } else {
                         int heightPixels = activity.getResources().getDisplayMetrics().heightPixels;
                         int widthPixels = activity.getResources().getDisplayMetrics().widthPixels;
-                        layout.getLayoutParams().height = Math.min(heightPixels, widthPixels);
+                        getLayoutParams().height = Math.min(heightPixels, widthPixels);
                         Log.v(TAG, "initHeight" + 0);
                     }
                     updateFullScreenButton();
@@ -647,23 +662,44 @@ public class VPlayPlayer extends RelativeLayout {
 
         }
     }
+    private void tryFullScreen(boolean fullScreen) {
+        if (activity instanceof AppCompatActivity) {
+            ActionBar supportActionBar = ((AppCompatActivity) activity).getSupportActionBar();
+            if (supportActionBar != null) {
+                if (fullScreen) {
+                    supportActionBar.hide();
+                } else {
+                    supportActionBar.show();
+                }
+            }
+        }
+        setFullScreen(fullScreen);
+    }
 
 
     private void setFullScreen(boolean fullScreen) {
-        if (mContext != null && mContext instanceof Activity) {
-            WindowManager.LayoutParams attrs = ((Activity) mContext).getWindow().getAttributes();
+        if (activity != null) {
+            WindowManager.LayoutParams attrs = activity.getWindow().getAttributes();
             if (fullScreen) {
                 attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                ((Activity) mContext).getWindow().setAttributes(attrs);
-                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                activity.getWindow().setAttributes(attrs);
+                activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                        View.SYSTEM_UI_FLAG_FULLSCREEN |
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
             } else {
                 attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                ((Activity) mContext).getWindow().setAttributes(attrs);
-                ((Activity) mContext).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                activity.getWindow().setAttributes(attrs);
+                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             }
         }
 
     }
+
 
 //    public void showDialog() {
 //        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -1020,7 +1056,6 @@ public class VPlayPlayer extends RelativeLayout {
     }
 
     private void start() {
-        isShowContoller = false;
         bottomProgress.setProgress(0);
         progressBar.setVisibility(View.VISIBLE);
         hide(false);
@@ -1036,7 +1071,6 @@ public class VPlayPlayer extends RelativeLayout {
             play.setSelected(true);
         } else if (mVideoView.isPlaying()) {
             statusChange(PlayStateParams.STATE_PAUSED);
-            isAutoPause = true;
             mVideoView.pause();
             play.setSelected(false);
 
@@ -1079,6 +1113,7 @@ public class VPlayPlayer extends RelativeLayout {
         else
             orientationEventListener.disable();
     }
+
     public int getCurrentPosition() {
 
         return mVideoView.getCurrentPosition();
@@ -1144,7 +1179,8 @@ public class VPlayPlayer extends RelativeLayout {
                 if (currentPosition == 0)
                     play(url, currentPosition);
                 else
-                    reStart();
+                    doPauseResume();
+//                    reStart();
             }
         });
         builder.setNegativeButton(mContext.getResources().getString(R.string.tips_not_wifi_cancel), new DialogInterface.OnClickListener() {
@@ -1178,6 +1214,7 @@ public class VPlayPlayer extends RelativeLayout {
         }
         bottomProgress.setProgress(0);
         seekBar.setProgress(0);
+        status=PlayStateParams.STATE_PLAYBACK_COMPLETED;
     }
 
     public void release() {
@@ -1185,6 +1222,7 @@ public class VPlayPlayer extends RelativeLayout {
             mVideoView.release(true);
         bottomProgress.setProgress(0);
         seekBar.setProgress(0);
+        status=PlayStateParams.STATE_PLAYBACK_COMPLETED;
     }
 
     public int getStatus() {
@@ -1202,25 +1240,27 @@ public class VPlayPlayer extends RelativeLayout {
     }
 
     public void onResume() {
+//        orientationEventListener.enable();
         if (status == PlayStateParams.STATE_PAUSED) {
-            if (currentPosition > 0) {
-                mVideoView.seekTo((int) currentPosition);
-            }
-            if (!isAutoPause) {
+            if (isAutoPause) {
+//                if (currentPosition > 0) {
+//                    mVideoView.seekTo((int) currentPosition);
+//                }
                 mVideoView.start();
                 play.setSelected(true);
+                isAutoPause = false;
                 statusChange(PlayStateParams.STATE_PLAYING);
             }
         }
     }
 
     public void onPause() {
-        show(0);//把系统状态栏显示出来
+//        orientationEventListener.disable();
+        //把系统状态栏显示出来
         if (status == PlayStateParams.STATE_PLAYING) {
             mVideoView.pause();
             play.setSelected(false);
-            isAutoPause = false;
-            currentPosition = mVideoView.getCurrentPosition();
+            isAutoPause = true;
             statusChange(PlayStateParams.STATE_PAUSED);
         }
     }
@@ -1229,7 +1269,6 @@ public class VPlayPlayer extends RelativeLayout {
     public void setShowContoller(boolean isShowContoller) {
         this.isShowContoller = isShowContoller;
         handler.removeMessages(PlayStateParams.SET_VIEW_HIDE);
-        showBottomControl(isShowContoller);
     }
 
     public void play(String url) {
@@ -1239,6 +1278,7 @@ public class VPlayPlayer extends RelativeLayout {
 
     public void play(String url, int position) {
         this.url = url;
+        status=PlayStateParams.STATE_PREPARE;
         if (!isNetListener) {// 如果设置不监听网络的变化，则取消监听网络变化的广播
             unregisterNetReceiver();
         } else {
@@ -1262,6 +1302,7 @@ public class VPlayPlayer extends RelativeLayout {
 
     public void start(String path) {
         Uri uri = Uri.parse(path);
+        status=PlayStateParams.STATE_PREPARE;
         start();
         if (!mVideoView.isPlaying()) {
             mVideoView.setVideoURI(uri);

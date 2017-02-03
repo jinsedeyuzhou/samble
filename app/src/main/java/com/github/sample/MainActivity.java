@@ -2,33 +2,44 @@ package com.github.sample;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.github.jinsedeyuzhou.VPlayPlayer;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity {
     private String url = "http://gslb.miaopai.com/stream/4YUE0MlhLclpX3HIeA273g__.mp4?yx=&refer=weibo_app";
     private FrameLayout content;
     private VPlayPlayer vp;
+    private int initHeight;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        content = (FrameLayout) findViewById(R.id.fl_content);
-        vp = new VPlayPlayer(this);
+        vp = (VPlayPlayer) findViewById(R.id.fl_content);
+//        initHeight = content.getLayoutParams().height;
+//        if (vp == null)
+//            vp =new VPlayPlayer(this);
         vp.setShowNavIcon(true);
         vp.setTitle(url);
-        if (vp.getParent() != null)
-            ((ViewGroup) vp.getParent()).removeAllViews();
-        content.addView(vp);
+//        if (vp.getParent() != null)
+//            ((ViewGroup) vp.getParent()).removeAllViews();
+
         vp.play(url);
+//        content.addView(vp);
 
-
+//
+//        findViewById(R.id.btn_list_video).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent=new Intent(MainActivity.this, ListViewActivity.class);
+//                startActivity(intent);
+//            }
+//        });
+//
 //        CustomDialog.Builder builder = new CustomDialog.Builder(this);
 //        builder.setMessage("这个就是自定义的提示框");
 //        builder.setTitle("提示");
@@ -63,6 +74,22 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
         if (vp != null)
             vp.onChanged(newConfig);
+//        if (newConfig.orientation==Configuration.ORIENTATION_PORTRAIT)
+//        {
+//            ViewGroup.LayoutParams params = content.getLayoutParams();
+//            int widthPixels = getResources().getDisplayMetrics().widthPixels;
+//            params.height = initHeight;
+//            content.setLayoutParams(params);
+//        }else
+//        {
+//            ViewGroup.LayoutParams params = content.getLayoutParams();
+//            int heightPixels =getResources().getDisplayMetrics().heightPixels;
+//            int widthPixels = getResources().getDisplayMetrics().widthPixels;
+//            params.height=widthPixels;
+////            params.width=widthPixels;
+//            content.setLayoutParams(params);
+//        }
+
     }
 
     @Override
