@@ -13,6 +13,7 @@ public class MainActivity extends FragmentActivity {
     private FrameLayout content;
     private VPlayPlayer vp;
     private int initHeight;
+    private DragScaleView dragview;
 
 
     @Override
@@ -20,6 +21,7 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         vp = (VPlayPlayer) findViewById(R.id.fl_content);
+        dragview = (DragScaleView) findViewById(R.id.dragview);
 //        initHeight = content.getLayoutParams().height;
 //        if (vp == null)
 //            vp =new VPlayPlayer(this);
@@ -64,9 +66,17 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (vp!=null)
-            vp.onKeyDown(keyCode,event);
+        if (vp!=null&& vp.handleVolumeKey(keyCode))
+            return true;
         return super.onKeyDown(keyCode, event);
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (vp.onBackPressed())
+            return ;
+        super.onBackPressed();
     }
 
     @Override

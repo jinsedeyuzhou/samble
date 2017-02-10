@@ -9,10 +9,10 @@
     <com.github.jinsedeyuzhou.VPlayPlayer
         android:id="@+id/fl_content"
         android:layout_width="match_parent"
-        android:layout_height="210dp">
+        android:layout_height="210dp"/>
 
 
-    </com.github.jinsedeyuzhou.VPlayPlayer>
+
     <!--<Button-->
     <!--android:layout_below="@id/fl_content"-->
     <!--android:id="@+id/btn_list_video"-->
@@ -22,4 +22,18 @@
 
     <!--android:text="视频列表"-->
     <!--/>-->
+    <com.github.sample.DragScaleView
+        android:id="@+id/dragview"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="80dp"
+        android:background="#000"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="拖动我，赶紧拖动我"
+           />
+
+    </com.github.sample.DragScaleView>
 </LinearLayout>
