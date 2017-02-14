@@ -78,12 +78,15 @@ public class VPlayPlayer extends FrameLayout {
     private TextView mTvDuration;
     private ImageView mImageTip;
     private ProgressBar mProgressGesture;
-    private RelativeLayout layout;
     private IntentFilter intentFilter;
     private ImageView mVideoLock;
     private RelativeLayout appVideoPlay;
     private ImageView mVideoShare;
     private LinearLayout container_tools;
+    private LinearLayout mVideoStaus;
+    private TextView mStatusText;
+    private LinearLayout mVideoNetTie;
+    private TextView mVideoNetTieIcon;
 
     //是否展示
     private boolean isShow;
@@ -92,7 +95,7 @@ public class VPlayPlayer extends FrameLayout {
     //是否显示控制bar
     private boolean isShowContoller;
 
-//    private boolean isSound;
+//    private boolean PlayerApplication.getInstance().isSound;
     private AudioManager audioManager;
     private int currentPosition;
     //默认超时时间
@@ -167,7 +170,8 @@ public class VPlayPlayer extends FrameLayout {
                     }
                     break;
                 case PlayStateParams.MESSAGE_SHOW_DIALOG:
-                    showWifiDialog();
+//                    showWifiDialog();
+                    mVideoNetTie.setVisibility(View.VISIBLE);
                     break;
             }
         }
@@ -181,24 +185,25 @@ public class VPlayPlayer extends FrameLayout {
                 if (isAllowModible && MediaNetUtils.getNetworkType(mContext) == 6 || MediaNetUtils.getNetworkType(mContext) == 3) {
                     doPauseResume();
                 } else if (!isAllowModible && MediaNetUtils.getNetworkType(mContext) == 6) {
-                    showWifiDialog();
+//                    showWifiDialog();
+                    mVideoNetTie.setVisibility(View.VISIBLE);
                 }
 
             } else if (id == R.id.full) {
                 toggleFullScreen();
             } else if (id == R.id.sound) {
 
-                if (!PlayerApplication.getInstance().isSound ) {
+                if (!PlayerApplication.getInstance().isSound) {
                     //静音
                     sound.setImageResource(R.mipmap.sound_mult_icon);
+//                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
                     audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
                 } else {
                     //取消静音
                     sound.setImageResource(R.mipmap.sound_open_icon);
                     audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
                 }
-                Log.v(TAG,"isSound"+audioManager.getMode()+"："+audioManager.getRingerMode()+"volume:"+audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)+";;;");
-                PlayerApplication.getInstance().isSound  = !PlayerApplication.getInstance().isSound ;
+                PlayerApplication.getInstance().isSound = !PlayerApplication.getInstance().isSound ;
             } else if (id == R.id.iv_video_finish) {
                 if (!onBackPressed())
                     activity.finish();
@@ -218,10 +223,17 @@ public class VPlayPlayer extends FrameLayout {
             } else if (id == R.id.app_video_share) {
 
             }
+            else if (id == R.id.app_video_netTie_icon) {
+                isAllowModible = true;
+                if (currentPosition == 0) {
+                    play(url);
+                } else
+                    doPauseResume();
+                mVideoNetTie.setVisibility(View.GONE);
+            }
         }
     };
-    private LinearLayout mVideoStaus;
-    private TextView mStatusText;
+
 
 
     public VPlayPlayer(Context context) {
@@ -259,7 +271,7 @@ public class VPlayPlayer extends FrameLayout {
         View.inflate(mContext, R.layout.video_player, this);
         contollerbar = findViewById(R.id.media_contoller);
         mVideoView = (IjkVideoView) findViewById(R.id.main_video);
-        layout = (RelativeLayout) findViewById(R.id.layout);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.layout);
 
         progressBar = (ProgressBar) findViewById(R.id.loading);
         bottomProgress = (ProgressBar) findViewById(R.id.bottom_progressbar);
@@ -279,6 +291,10 @@ public class VPlayPlayer extends FrameLayout {
         //status
         mVideoStaus = (LinearLayout) findViewById(R.id.app_video_status);
         mStatusText = (TextView) findViewById(R.id.app_video_status_text);
+
+        //网络提示
+        mVideoNetTie = (LinearLayout) findViewById(R.id.app_video_netTie);
+        mVideoNetTieIcon = (TextView) findViewById(R.id.app_video_netTie_icon);
 
         //触屏
         gestureTouch = (LinearLayout) findViewById(R.id.ll_gesture_touch);
@@ -325,6 +341,7 @@ public class VPlayPlayer extends FrameLayout {
         mVideoLock.setOnClickListener(onClickListener);
         mVideoShare.setOnClickListener(onClickListener);
 //        pauseImage.setOnClickListener(onClickListener);
+        mVideoNetTieIcon.setOnClickListener(onClickListener);
         seekBar.setMax(1000);
         seekBar.setOnSeekBarChangeListener(mSeekListener);
         final GestureDetector detector = new GestureDetector(mContext, new PlayGestureListener());
@@ -386,12 +403,15 @@ public class VPlayPlayer extends FrameLayout {
         } catch (Throwable e) {
             Log.e(TAG, "loadLibraries error", e);
         }
+//
+//        audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+//        mMaxVolume = ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
+//                .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+
 
         audioManager = (AudioManager) PlayerApplication.getAppContext().getSystemService(Context.AUDIO_SERVICE);
         mMaxVolume = ((AudioManager) PlayerApplication.getAppContext().getSystemService(Context.AUDIO_SERVICE))
                 .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-
-
 
         mVideoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
@@ -989,7 +1009,6 @@ public class VPlayPlayer extends FrameLayout {
             if (volume < 0)
                 volume = 0;
         }
-//        hide();
 
         int index = (int) (percent * mMaxVolume) + volume;
         if (index > mMaxVolume)
@@ -1095,6 +1114,7 @@ public class VPlayPlayer extends FrameLayout {
         } else if (curVolume < 0) {
             curVolume = 0;
             sound.setImageResource(R.mipmap.sound_mult_icon);
+//            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
             audioManager.setStreamMute(AudioManager.STREAM_MUSIC,true);
             PlayerApplication.getInstance().isSound=true;
 
@@ -1417,7 +1437,8 @@ public class VPlayPlayer extends FrameLayout {
             registerNetReceiver();
         }
         if (!isAllowModible && MediaNetUtils.getNetworkType(mContext) == 6) {
-            showWifiDialog();
+//            showWifiDialog();
+            mVideoNetTie.setVisibility(View.VISIBLE);
         } else {
             if (playerSupport) {
                 progressBar.setVisibility(View.VISIBLE);
@@ -1523,7 +1544,8 @@ public class VPlayPlayer extends FrameLayout {
                 onPause();
                 show(0);
 //                onNetChangeListener.onMobile();
-                showWifiDialog();
+//                showWifiDialog();
+                mVideoNetTie.setVisibility(View.VISIBLE);
 
             } else if (MediaNetUtils.getNetworkType(activity) == 1) {// 网络链接断开
                 Toast.makeText(mContext, "网路已断开", Toast.LENGTH_SHORT).show();
