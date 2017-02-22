@@ -736,6 +736,8 @@ public class VPlayPlayer extends FrameLayout {
                 public void run() {
                     tryFullScreen(!portrait);
                     ViewGroup.LayoutParams params = getLayoutParams();
+                    if (null == params)
+                        return;
                     if (portrait) {
                         top_box.setVisibility(View.GONE);
                         Log.v(TAG, "initHeight" + initHeight);
@@ -746,7 +748,9 @@ public class VPlayPlayer extends FrameLayout {
                     } else {
                         int heightPixels = activity.getResources().getDisplayMetrics().heightPixels;
                         int widthPixels = activity.getResources().getDisplayMetrics().widthPixels;
-                        getLayoutParams().height = Math.min(heightPixels, widthPixels);
+                        params.height = Math.min(heightPixels, widthPixels);
+                        setLayoutParams(params);
+                        requestLayout();
                         Log.v(TAG, "initHeight" + 0);
                     }
                     updateFullScreenButton();
@@ -1329,6 +1333,7 @@ public class VPlayPlayer extends FrameLayout {
 //                    reStart();
             }
         });
+
         builder.setNegativeButton(mContext.getResources().getString(R.string.tips_not_wifi_cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
