@@ -154,3 +154,31 @@
 [ijkplayer](https://github.com/Bilibili/ijkplayer)  
 [GiraffePlayer](https://github.com/tcking/GiraffePlayer)  
 and so and
+##ISSUE
+**FFMPEG bug：**  
+1. IJKPLAY有一个问题，我也提过ISSUSE了 #2104，不过目前还未解决，就是某些短小的视频会无法seekTo，说是FFMEPG的问题  
+2. 快进到某个位置会回退几个关键帧。
+3. 别开硬解码
+
+##About Author
+
+##License
+
+**Copyright (C) dou361, The Framework Open Source Project**
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+(Frequently Asked Questions)FAQ
+##Bugs Report and Help
+
+If you find any bug when using project, please report here. Thanks for helping us building a better one.
