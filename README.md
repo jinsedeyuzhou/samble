@@ -156,7 +156,7 @@
 and so and
 ##ISSUE
 **FFMPEG bug：**  
-1. IJKPLAY有一个问题，我也提过ISSUSE了 #2104，不过目前还未解决，就是某些短小的视频会无法seekTo，说是FFMEPG的问题  
+1. IJKPLAY有一个问题，有人已经提过，不过目前还未解决，就是某些短小的视频会无法seekTo，说是FFMEPG的问题  
 2. 快进到某个位置会回退几个关键帧。
 3. 别开硬解码
 
