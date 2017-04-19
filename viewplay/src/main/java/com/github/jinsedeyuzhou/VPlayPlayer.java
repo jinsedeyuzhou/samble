@@ -499,7 +499,7 @@ public class VPlayPlayer extends FrameLayout implements View.OnTouchListener, Vi
                 } else {
                     MotionEvent me = MotionEvent.obtain(event.getDownTime(), event.getEventTime(),
                             event.getAction(), x, y, event.getMetaState());
-                 return   seekBar.onTouchEvent(me);
+                    return seekBar.onTouchEvent(me);
 
 
                 }
@@ -994,6 +994,7 @@ public class VPlayPlayer extends FrameLayout implements View.OnTouchListener, Vi
 
     /**
      * 处理音量键，避免外部按音量键后导航栏和状态栏显示出来退不回去的状态
+     *
      * @param keyCode
      * @return
      */
@@ -1172,10 +1173,10 @@ public class VPlayPlayer extends FrameLayout implements View.OnTouchListener, Vi
         return mVideoView.getCurrentPosition();
     }
 
-    public void setAllowTouch(boolean isAllowTouch)
-    {
-        this.isAllowTouch=isAllowTouch;
+    public void setAllowTouch(boolean isAllowTouch) {
+        this.isAllowTouch = isAllowTouch;
     }
+
     public boolean getAllowModible() {
         return isAllowModible;
     }
@@ -1263,11 +1264,12 @@ public class VPlayPlayer extends FrameLayout implements View.OnTouchListener, Vi
     public void onResume() {
         if (status == PlayStateParams.STATE_PAUSED) {
 //            if (isAutoPause) {
-                mVideoView.start();
-                play.setSelected(true);
+            releaseBitmap();
+            mVideoView.start();
+            play.setSelected(true);
 //                isAutoPause = false;
-                releaseBitmap();
-                statusChange(PlayStateParams.STATE_PLAYING);
+
+            statusChange(PlayStateParams.STATE_PLAYING);
 //            }
         }
     }
@@ -1345,17 +1347,16 @@ public class VPlayPlayer extends FrameLayout implements View.OnTouchListener, Vi
 
     }
 
-    public void seekToNewPosition(int newPosition)
-    {
-        this.newPosition=newPosition;
+    public void seekToNewPosition(int newPosition) {
+        this.newPosition = newPosition;
         endGesture();
 //        doPauseResume();
     }
 
-    public String getUrl()
-    {
+    public String getUrl() {
         return url;
     }
+
     public void setDuration(long duration) {
         this.duration = duration;
     }
