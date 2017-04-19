@@ -1,5 +1,5 @@
 ## 视频播放器
-##introduction##
+## introduction ##
  
 该视频播放器基于Bilibili的开源项目ijkplayer做的，是基于其demo做的。主要做了视频播放器的界面的定制，基于ijkplayer项目进行的播放器界面 UI 封装。
 
@@ -12,13 +12,13 @@
 * 截屏，跑马灯标题，锁屏，并对用户体验效果做了部分优化。
 * 解决了demo中部分问题。
 
-##Screenshot##
+## Screenshot##
 
 ![player](./player.png)   
  
 ![player](./playerone.png)  
 	
-##Usage##
+## Usage##
 
  **step1**    
 
@@ -140,7 +140,7 @@
 	       
 	    }
 
-##Proguard
+## Proguard
 
 根据你的混淆器配置和使用，您可能需要在你的 proguard 文件内配置以下内容：
 
@@ -149,20 +149,20 @@
 		-dontwarn com.dou361.ijkplayer.**;
 		}
 
-##Thanks
+## Thanks
 [GSYVideoPlayer](https://github.com/CarGuo/GSYVideoPlayer)  
 [ijkplayer](https://github.com/Bilibili/ijkplayer)  
 [GiraffePlayer](https://github.com/tcking/GiraffePlayer)  
 and so and
-##ISSUE
+## ISSUE
 **FFMPEG bug：**  
 1. IJKPLAY有一个问题，有人已经提过，不过目前还未解决，就是某些短小的视频会无法seekTo，说是FFMEPG的问题  
 2. 快进到某个位置会回退几个关键帧。
 3. 别开硬解码
 
-##About Author
+## About Author
 
-##License
+## License
 
 **Copyright (C) dou361, The Framework Open Source Project**
 
