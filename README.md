@@ -12,13 +12,13 @@
 * 截屏，跑马灯标题，锁屏，并对用户体验效果做了部分优化。
 * 解决了demo中部分问题。
 
-## Screenshot##
+## Screenshot
 
 ![player](./player.png)   
  
 ![player](./playerone.png)  
 	
-## Usage##
+## Usage
 
  **step1**    
 
