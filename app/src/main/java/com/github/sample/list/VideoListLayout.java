@@ -16,6 +16,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.github.jinsedeyuzhou.IPlayer;
 import com.github.jinsedeyuzhou.PlayStateParams;
 import com.github.jinsedeyuzhou.VPlayPlayer;
 import com.github.sample.R;
@@ -74,8 +75,8 @@ public class VideoListLayout extends RelativeLayout {
         initActions();
     }
 
-    private void initView(Context context){
-        LayoutInflater.from(context).inflate(R.layout.layout_video_list,this,true);
+    private void initView(Context context) {
+        LayoutInflater.from(context).inflate(R.layout.layout_video_list, this, true);
         this.context = context;
         mLayoutManager = new LinearLayoutManager(context);
         videoList = (RecyclerView) findViewById(R.id.video_list);
@@ -114,14 +115,13 @@ public class VideoListLayout extends RelativeLayout {
             @Override
             public void onClick(View v) {
                 smallLayout.setVisibility(View.GONE);
-                ((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             }
         });
 
-        videoItemView.setCompletionListener(new VPlayPlayer.CompletionListener() {
+        videoItemView.setCompletionListener(new IPlayer.CompletionListener() {
             @Override
             public void completion(IMediaPlayer mp) {
-
                 //播放完还原播放界面
                 if (smallLayout.getVisibility() == View.VISIBLE) {
                     videoLayout.removeAllViews();
@@ -282,8 +282,8 @@ public class VideoListLayout extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (videoItemView==null)
-            videoItemView=new VPlayPlayer(context);
+        if (videoItemView == null)
+            videoItemView = new VPlayPlayer(context);
     }
 
     @Override
