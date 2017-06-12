@@ -15,9 +15,7 @@ import android.widget.FrameLayout;
 public class DragScaleView extends FrameLayout {
 
     private ViewDragHelper mViewDragHelper;
-
     private View mFirstView;
-
     private int mFirstViewWidth;
 
     public DragScaleView(Context context) {

@@ -78,7 +78,7 @@
 3. MainActivity.java
 
 		  private String url = "http://gslb.miaopai.com/stream/4YUE0MlhLclpX3HIeA273g__.mp4?yx=&refer=weibo_app";
-		    private VPlayPlayer vp;
+		    private VPlayPlayer vPlayer;
 		
 		
 		    @Override
@@ -95,10 +95,15 @@
 	
 	    @Override
 	    public boolean onKeyDown(int keyCode, KeyEvent event) {
-	    //系统音量键控制，如果不写会调用系统的音量键，在视频列表的话尽量不要写
-	        if (vPlayPlayer != null) {
-                if (vPlayPlayer.onKeyDown(keyCode, event))
-                    return true;
+	  
+	        if (vPlayPlayer != null)
+	        {  //系统音量键控制，如果不写会调用系统的音量键，在视频列表的话尽量不要写
+                 if (vPlayer.handleVolumeKey(keyCode)) {
+                               return true;
+                    //判断是否全屏，是全屏的话返回小屏
+                  } else if (vPlayer.onKeyDown(keyCode, event)) {
+                               return true;
+                 }
           	  }
 	        return super.onKeyDown(keyCode, event);
 	    }
@@ -107,7 +112,7 @@
 	    @Override
 	    public void onConfigurationChanged(Configuration newConfig) {
 	        super.onConfigurationChanged(newConfig);
-		//横竖屏切换不改变Activity 生命周期
+		    //横竖屏切换不改变Activity 生命周期
 	        if (vPlayer != null)
 	            vPlayer.onChanged(newConfig);
 	    }

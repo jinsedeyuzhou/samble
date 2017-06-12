@@ -281,23 +281,23 @@ public class VPlayPlayer extends FrameLayout implements View.OnTouchListener, Vi
 
     }
 
-//    /**
-//     *
-//     * 用此当布局的时候才用到其他情况用上面那中方法获取
-//     * @param changed
-//     * @param left
-//     * @param top
-//     * @param right
-//     * @param bottom
-//     */
-//    @Override
-//    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-//        super.onLayout(changed, left, top, right, bottom);
-//        if (initHeight == 0) {
-//            initHeight = getHeight();
-//            screenWidthPixels = getResources().getDisplayMetrics().widthPixels;
-//        }
-//    }
+    /**
+     *
+     * 用此当布局的时候才用到其他情况用上面那中方法获取
+     * @param changed
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     */
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (initHeight == 0) {
+            initHeight = getHeight();
+            screenWidthPixels = getResources().getDisplayMetrics().widthPixels;
+        }
+    }
 
     private void initAction() {
         sound.setOnClickListener(this);
@@ -749,7 +749,8 @@ public class VPlayPlayer extends FrameLayout implements View.OnTouchListener, Vi
             Log.d(TAG, "STATE_PLAYBACK_COMPLETED");
             orientationEventListener.disable();
             bottomProgress.setProgress(0);
-            isShowContoller = false;
+            play.setSelected(false);
+//            isShowContoller = false;
             hideAll();
             handler.removeMessages(PlayStateParams.MESSAGE_SHOW_PROGRESS);
             handler.removeCallbacksAndMessages(null);
@@ -1152,13 +1153,16 @@ public class VPlayPlayer extends FrameLayout implements View.OnTouchListener, Vi
     public boolean handleVolumeKey(int keyCode) {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             setVolume(true);
+            endGesture();
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             setVolume(false);
+            endGesture();
             return true;
         } else {
             return false;
         }
+
     }
 
     /**
@@ -1196,7 +1200,7 @@ public class VPlayPlayer extends FrameLayout implements View.OnTouchListener, Vi
             mImageTip.setImageResource(R.mipmap.player_video_volume);
         }
         mProgressGesture.setProgress((curVolume * 100 / mMaxVolume));
-        endGesture();
+
     }
 
 
