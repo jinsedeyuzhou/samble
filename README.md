@@ -28,12 +28,12 @@
 		compile fileTree(dir: 'libs', include: ['*.jar'])
 		testCompile 'junit:junit:4.12'
 		compile 'com.android.support:appcompat-v7:24.1.0'
-		compile project(":videoplayer")
+		compile project(":viewplay")
 		}
 	
 	setting.gradle
 
-		include ':videoplayer'
+		include ':viewplay'
 **step2**
 	 
 1. Androidmanifest.xml  
@@ -46,7 +46,8 @@
 		        android:supportsRtl="true"
 		        android:theme="@style/AppTheme">
 		        <activity android:name=".MainActivity"
-		            android:configChanges="keyboardHidden|orientation|screenSize"
+				//配置 configChanges
+		            android:configChanges="keyboardHidden|orientation|screenSize"
 		            android:screenOrientation="sensor"
 		            android:theme="@style/Theme.AppCompat.NoActionBar"
 		            >
@@ -58,12 +59,13 @@
 		        </activity>
 		        <activity android:name=".list.ListViewActivity"/>
 		    </application>
-		
+		//在自定义application
 		public class VIdeoApplication extends Application {
 		    @Override
 		    public void onCreate() {
 		        super.onCreate();
-		        PlayerApplication.initApp(this);
+			//初始化player application
+		        PlayerApplication.initApp(this);
 		    }
 		}
 
@@ -77,65 +79,64 @@
 
 		  private String url = "http://gslb.miaopai.com/stream/4YUE0MlhLclpX3HIeA273g__.mp4?yx=&refer=weibo_app";
 		    private VPlayPlayer vp;
-		    private DragScaleView dragview;
 		
 		
 		    @Override
 		    protected void onCreate(Bundle savedInstanceState) {
 		        super.onCreate(savedInstanceState);
 		        setContentView(R.layout.activity_main);
-		        vp = (VPlayPlayer) findViewById(R.id.fl_content);
-		        dragview = (DragScaleView) findViewById(R.id.dragview);
-		        vp.setShowNavIcon(true);
-		        vp.setTitle(url);
-		        vp.play(url);
+		        vPlayer = (VPlayPlayer) findViewById(R.id.fl_content)；
+		        vPlayer.setShowNavIcon(true);
+		        vPlayer.setTitle(url);
+		        vPlayer.play(url);
 		    };
 4. 配置生命周期方法,为了让播放器同步Activity生命周期
 
-
+	
 	    @Override
 	    public boolean onKeyDown(int keyCode, KeyEvent event) {
-	        if (vp!=null&& vp.handleVolumeKey(keyCode))
-	            return true;
+	    //系统音量键控制，如果不写会调用系统的音量键，在视频列表的话尽量不要写
+	        if (vPlayPlayer != null) {
+                if (vPlayPlayer.onKeyDown(keyCode, event))
+                    return true;
+          	  }
 	        return super.onKeyDown(keyCode, event);
 	    }
 	
 	
 	    @Override
-	    public void onBackPressed() {
-	        if (vp.onBackPressed())
-	            return ;
-	        super.onBackPressed();
-	    }
-	
-	    @Override
 	    public void onConfigurationChanged(Configuration newConfig) {
 	        super.onConfigurationChanged(newConfig);
-	        if (vp != null)
-	            vp.onChanged(newConfig);
+		//横竖屏切换不改变Activity 生命周期
+	        if (vPlayer != null)
+	            vPlayer.onChanged(newConfig);
 	    }
 	
 	    @Override
 	    protected void onResume() {
 	        super.onResume();
-	        if (vp != null)
-	            vp.onResume();
+		//可见时再次播放，根据需要是否开启暂停后重新进入自动播放
+	        if (vPlayer != null)
+	            vPlayer.onResume();
 	    }
 	
 	    @Override
 	    protected void onPause() {
 	        super.onPause();
-	        if (vp != null)
-	            vp.onPause();
+		//切换后台时暂停播放，
+	        if (vPlayer != null)
+	            vPlayer.onPause();
 	
 	    }
 	
 	    @Override
 	    protected void onDestroy() {
 	        super.onDestroy();
-	        if (vp != null) {
-	            vp.onDestory();
-	            vp=null;
+	        if (vPlayer != null) {
+	            if (vPlayer.getParent() != null)
+               		 ((ViewGroup) vPlayer.getParent()).removeAllViews();
+           		 vPlayer.onDestory();
+            		 vPlayer = null;
 	        }
 	       
 	    }
@@ -144,10 +145,8 @@
 
 根据你的混淆器配置和使用，您可能需要在你的 proguard 文件内配置以下内容：
 
-		-keep com.dou361.ijkplayer.** {
-		*;
-		-dontwarn com.dou361.ijkplayer.**;
-		}
+	-keep class tv.danmaku.ijk.media.** { *; }
+	-dontwarn tv.danmaku.ijk.**
 
 ## Thanks
 [GSYVideoPlayer](https://github.com/CarGuo/GSYVideoPlayer)  
@@ -161,6 +160,8 @@ and so and
 3. 别开硬解码
 
 ## About Author
+qq:2315813288
+email:jinsedeyuzhou@sina.com
 
 ## License
 
